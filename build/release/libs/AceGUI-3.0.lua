@@ -20,4 +20,3 @@ AceGUI.WidgetContainer = {}
 AceGUI.WidgetInteractive = {}
 
 _G.AceGUI = AceGUI
-_G.AceGUI-3.0 = AceGUI

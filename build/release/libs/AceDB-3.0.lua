@@ -9,9 +9,8 @@ function AceDB:New(name, default, db)
     return db
 end
 
-function AceDB:RegisterNamespace(name, db)
-    return self:New(name, nil, db)
+function AceDB:RegisterNamespace(name, ns)
+    return self:New(name, nil, ns or {})
 end
 
 _G.AceDB = AceDB
-_G.AceDB-3.0 = AceDB

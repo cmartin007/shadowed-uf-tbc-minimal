@@ -19,11 +19,9 @@ end
 
 function AceEvent:RegisterEvent(frame, event, handler)
     if type(frame) == "string" then
-        -- Called as Mixin
         return
     end
     frame:RegisterEvent(event)
 end
 
 _G.AceEvent = AceEvent
-_G.AceEvent-3.0 = AceEvent
