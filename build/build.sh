@@ -25,7 +25,7 @@ fi
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
-# Files to include (from TOC)
+# Files to include (from repo)
 echo "Copying core files..."
 cp "$REPO_DIR/ShadowedUnitFrames.toc" "$BUILD_DIR/"
 cp "$REPO_DIR/ShadowedUnitFrames.lua" "$BUILD_DIR/"
@@ -37,23 +37,14 @@ echo "Copying localization..."
 mkdir -p "$BUILD_DIR/localization"
 cp "$REPO_DIR/localization/enUS.lua" "$BUILD_DIR/localization/"
 
-# Libraries (embedded)
+# Libraries - copy from repo
 echo "Copying libraries..."
 mkdir -p "$BUILD_DIR/libs"
 
-# Copy LibStub
-cp -r "$REPO_DIR/build/release/libs/LibStub" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/LibStub.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/AceGUI-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/AceDB-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/AceEvent-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/LibSharedMedia-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/LibDualSpec-1.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/LibSpellRange-1.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-cp -r "$REPO_DIR/build/release/libs/UTF8.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
-
-# Copy CallbackHandler
-cp -r "$REPO_DIR/build/release/libs/CallbackHandler-1.0" "$BUILD_DIR/libs/" 2>/dev/null || true
+# Copy from repo libs folder
+if [ -d "$REPO_DIR/libs" ]; then
+    cp -r "$REPO_DIR/libs/"* "$BUILD_DIR/libs/" 2>/dev/null || true
+fi
 
 # Modules (from repo)
 echo "Copying modules..."
@@ -112,15 +103,3 @@ echo "=== Build Complete ==="
 echo "Files: $FILE_COUNT"
 echo "Size: $SIZE"
 echo "Location: $BUILD_DIR"
-echo ""
-echo "To package as zip:"
-if command -v zip &> /dev/null; then
-    cd "$BUILD_DIR"
-    zip -r "../ShadowedUnitFrames-TBC-Minimal.zip" .
-    echo "Created: $REPO_DIR/build/ShadowedUnitFrames-TBC-Minimal.zip"
-else
-    echo "  cd $BUILD_DIR"
-    echo "  zip -r ../ShadowedUnitFrames-TBC-Minimal.zip ."
-    echo ""
-    echo "  (zip not installed)"
-fi

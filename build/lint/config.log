@@ -1,0 +1,11 @@
+Critical error: in config loaded from .luacheckrc: invalid value of option 'std': unknown std 'wow'
+Checking /home/openclaw/.openclaw/workspace/git-repos/ShadowedUnitFrames/Config.lua 1 warning
+
+    /home/openclaw/.openclaw/workspace/git-repos/ShadowedUnitFrames/Config.lua:4:10: (W211) unused variable 'SUF'
+
+Total: 1 warning / 0 errors in 1 file
+Checking /home/openclaw/.openclaw/workspace/git-repos/ShadowedUnitFrames/Config.lua 1 warning
+
+    /home/openclaw/.openclaw/workspace/git-repos/ShadowedUnitFrames/Config.lua:4:10: (W211) unused variable 'SUF'
+
+Total: 1 warning / 0 errors in 1 file
