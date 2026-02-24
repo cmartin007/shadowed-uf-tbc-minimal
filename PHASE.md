@@ -1,5 +1,7 @@
 # SUF TBC Minimal - Development Plan
 
+**Target: WoW Classic Anniversary TBC ONLY.** No retail, no other Classic eras.
+
 ## Philosophy
 - **Speed first** - Every feature must not impact performance
 - **Robust** - No fragile code, edge cases handled

@@ -1,6 +1,6 @@
 # WoW Classic Anniversary TBC – API References
 
-**Target:** WoW Classic Anniversary TBC (anniversary re-release of Burning Crusade Classic).
+**Target: TBC Anniversary ONLY.** This addon is for WoW Classic Anniversary TBC (re-release of Burning Crusade Classic). Do not use retail-only APIs.
 
 ## Source of truth for API calls
 

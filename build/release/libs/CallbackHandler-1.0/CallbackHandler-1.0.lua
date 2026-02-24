@@ -28,4 +28,4 @@ function Callbacks:Unregister(event)
     self.handlers[event] = nil
 end
 
-_G.CallbackHandler_1.0 = Callbacks
+_G.CallbackHandler_1_0 = Callbacks

@@ -43,6 +43,9 @@ function ShadowUF:OnInitialize()
 			visibility = {arena = {}, pvp = {}, party = {}, raid = {}, neighborhood = {}},
 			hidden = {cast = false, playerPower = true, buffs = false, party = true, raid = false, player = true, pet = true, target = true, focus = true, boss = true, arena = true, playerAltPower = false},
 		},
+		global = {
+			infoID = 0,
+		},
 	}
 
 	self:LoadUnitDefaults()
@@ -72,13 +75,11 @@ function ShadowUF:OnInitialize()
 			return tbl[index]
 	end})
 
-	if( not self.db.profile.loadedLayout ) then
-		self:LoadDefaultLayout()
-	else
-		self:CheckUpgrade()
-		self:CheckBuild()
-		self:ShowInfoPanel()
-	end
+	-- Always load fixed layout from defaultlayout.lua for all users/characters (do not use saved layout)
+	self:LoadDefaultLayout()
+	self:CheckUpgrade()
+	self:CheckBuild()
+	self:ShowInfoPanel()
 
 	self.db.profile.revision = self.dbRevision
 	self:FireModuleEvent("OnInitialize")
@@ -649,13 +650,10 @@ function ShadowUF:ProfilesChanged()
 
 	self.db:RegisterDefaults(self.defaults)
 
-	-- No active layout, register the default one
-	if( not self.db.profile.loadedLayout ) then
-		self:LoadDefaultLayout()
-	else
-		self:CheckUpgrade()
-		self:CheckBuild()
-	end
+	-- Always apply fixed layout from defaultlayout.lua for all users/characters
+	self:LoadDefaultLayout()
+	self:CheckUpgrade()
+	self:CheckBuild()
 
 	self.db.profile.revision = self.dbRevision
 
@@ -680,29 +678,33 @@ end
 local function basicHideBlizzardFrames(...)
 	for i=1, select("#", ...) do
 		local frame = select(i, ...)
-		frame:UnregisterAllEvents()
-		frame:HookScript("OnShow", rehideFrame)
-		frame:Hide()
+		if frame then
+			frame:UnregisterAllEvents()
+			frame:HookScript("OnShow", rehideFrame)
+			frame:Hide()
+		end
 	end
 end
 
 local function hideBlizzardFrames(taint, ...)
 	for i=1, select("#", ...) do
 		local frame = select(i, ...)
-		UnregisterUnitWatch(frame)
-		frame:UnregisterAllEvents()
-		frame:Hide()
+		if frame then
+			UnregisterUnitWatch(frame)
+			frame:UnregisterAllEvents()
+			frame:Hide()
 
-		if( frame.manabar ) then frame.manabar:UnregisterAllEvents() end
-		if( frame.healthbar ) then frame.healthbar:UnregisterAllEvents() end
-		if( frame.spellbar ) then frame.spellbar:UnregisterAllEvents() end
-		if( frame.powerBarAlt ) then frame.powerBarAlt:UnregisterAllEvents() end
+			if( frame.manabar ) then frame.manabar:UnregisterAllEvents() end
+			if( frame.healthbar ) then frame.healthbar:UnregisterAllEvents() end
+			if( frame.spellbar ) then frame.spellbar:UnregisterAllEvents() end
+			if( frame.powerBarAlt ) then frame.powerBarAlt:UnregisterAllEvents() end
 
-		if( taint ) then
-			frame.Show = ShadowUF.noop
-		else
-			frame:SetParent(ShadowUF.hiddenFrame)
-			frame:HookScript("OnShow", rehideFrame)
+			if( taint ) then
+				frame.Show = ShadowUF.noop
+			else
+				frame:SetParent(ShadowUF.hiddenFrame)
+				frame:HookScript("OnShow", rehideFrame)
+			end
 		end
 	end
 end

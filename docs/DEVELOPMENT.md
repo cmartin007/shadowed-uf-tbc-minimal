@@ -1,7 +1,7 @@
 # SUF TBC Minimal - Development Notes
 
 ## Project Goal
-Lightweight, fast unit frames for **WoW Classic Anniversary TBC** (anniversary re-release of Burning Crusade Classic)
+Lightweight, fast unit frames for **WoW Classic Anniversary TBC ONLY** (anniversary re-release of Burning Crusade Classic). No retail support; APIs must be TBC-compatible.
 
 ## Core Principles
 1. Speed first - Every feature must not impact performance

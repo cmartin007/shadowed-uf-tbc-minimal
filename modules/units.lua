@@ -246,7 +246,8 @@ end
 local function SetVisibility(self)
 	local layoutUpdate
 	local instanceType = select(2, IsInInstance()) or "none"
-	local playerSpec = GetSpecialization()
+	-- TBC Anniversary only: no GetSpecialization (retail spec API)
+	local playerSpec = 1
 	if( instanceType == "scenario" ) then instanceType = "party" end
 	if( instanceType == "interior" ) then instanceType = "neighborhood" end
 
@@ -554,6 +555,9 @@ OnAttributeChanged = function(self, name, unit)
 		-- full update when the player targetable changes, ie. during cutscenes or transports
 		self:RegisterUnitEvent("UNIT_TARGETABLE_CHANGED", self, "FullUpdate")
 
+		-- Refresh name/tags when AFK/DND status changes so [afk] tag updates
+		self:RegisterNormalEvent("PLAYER_FLAGS_CHANGED", self, "FullUpdate")
+
 	-- Update boss
 	elseif( self.unitType == "boss" ) then
 		self:RegisterNormalEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT", self, "FullUpdate")
@@ -574,6 +578,8 @@ OnAttributeChanged = function(self, name, unit)
 		self:RegisterNormalEvent("GROUP_ROSTER_UPDATE", Units, "CheckGroupedUnitStatus")
 		self:RegisterUnitEvent("UNIT_NAME_UPDATE", Units, "CheckUnitStatus")
 		self:RegisterUnitEvent("UNIT_CONNECTION", self, "FullUpdate")
+		-- Refresh when AFK/DND status changes so [afk] tag updates
+		self:RegisterUnitEvent("UNIT_FLAGS", self, "FullUpdate")
 
 	-- Party members need to watch for changes
 	elseif( self.unitRealType == "party" ) then
@@ -583,6 +589,8 @@ OnAttributeChanged = function(self, name, unit)
 		self:RegisterUnitEvent("UNIT_NAME_UPDATE", Units, "CheckUnitStatus")
 		self:RegisterUnitEvent("UNIT_OTHER_PARTY_CHANGED", self, "FullUpdate")
 		self:RegisterUnitEvent("UNIT_CONNECTION", self, "FullUpdate")
+		-- Refresh when AFK/DND status changes so [afk] tag updates
+		self:RegisterUnitEvent("UNIT_FLAGS", self, "FullUpdate")
 
 	-- *target units are not real units, thus they do not receive events and must be polled for data
 	elseif( ShadowUF.fakeUnits[self.unitRealType] ) then
@@ -688,8 +696,12 @@ local function ClassToken(self)
 end
 
 local function ArenaClassToken(self)
-	local specID = GetArenaOpponentSpec(self.unitID)
-	return specID and select(6, GetSpecializationInfoByID(specID))
+	-- TBC Anniversary only: no GetSpecializationInfoByID (retail); use class token
+	if GetArenaOpponentSpec and GetSpecializationInfoByID then
+		local specID = GetArenaOpponentSpec(self.unitID)
+		return specID and select(6, GetSpecializationInfoByID(specID))
+	end
+	return select(2, UnitClass(self.unit))
 end
 
 function Units:CreateUnit(...)

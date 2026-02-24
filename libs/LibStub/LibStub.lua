@@ -24,6 +24,14 @@ function LibStub:IterateLibraries()
 end
 
 LibStub.objects = {}
-setmetatable(LibStub, {__call = LibStub.NewLibrary})
+-- LibStub("Major", true) = get library (silent); LibStub("Major", minor) = new library (minor = number)
+setmetatable(LibStub, {
+    __call = function(self, major, arg2)
+        if type(arg2) == "boolean" then
+            return self:GetLibrary(major, arg2)
+        end
+        return self:NewLibrary(major, arg2)
+    end
+})
 
 _G.LibStub = LibStub

@@ -1,7 +1,7 @@
 # SUF TBC Minimal - Development Progress
 
 ## Project Overview
-**Goal:** Create lightweight, fast unit frames for **WoW Classic Anniversary TBC**
+**Goal:** Create lightweight, fast unit frames for **WoW Classic Anniversary TBC ONLY** (no retail, no other Classic).
 **Repo:** https://github.com/cmartin007/shadowed-uf-tbc-minimal
 
 ---
