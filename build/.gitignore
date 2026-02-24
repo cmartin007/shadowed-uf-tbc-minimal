@@ -1,0 +1,17 @@
+# Build output
+build/release/
+*.zip
+
+# Python venv
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
