@@ -8,11 +8,20 @@ set -e
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD_DIR="$REPO_DIR/build/release"
 
-echo "Building SUF TBC Minimal..."
+echo "=== Building SUF TBC Minimal ==="
 echo "Repo: $REPO_DIR"
-echo "Output: $BUILD_DIR"
+echo ""
 
-# Clean build dir
+# Check for luacheck
+if ! command -v luacheck &> /dev/null; then
+    echo "Warning: luacheck not installed. Skipping lint."
+    echo "Install with: brew install luacheck"
+    LINT=false
+else
+    LINT=true
+fi
+
+# Clean build dir first
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
@@ -33,36 +42,20 @@ echo "Copying libraries..."
 mkdir -p "$BUILD_DIR/libs"
 
 # Copy LibStub
-if [ -d "$REPO_DIR/libs/LibStub" ]; then
-    cp -r "$REPO_DIR/libs/LibStub" "$BUILD_DIR/libs/"
-fi
+cp -r "$REPO_DIR/build/release/libs/LibStub" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/LibStub.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/AceGUI-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/AceDB-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/AceEvent-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/LibSharedMedia-3.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/LibDualSpec-1.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/LibSpellRange-1.0.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
+cp -r "$REPO_DIR/build/release/libs/UTF8.lua" "$BUILD_DIR/libs/" 2>/dev/null || true
 
 # Copy CallbackHandler
-if [ -d "$REPO_DIR/libs/CallbackHandler-1.0" ]; then
-    cp -r "$REPO_DIR/libs/CallbackHandler-1.0" "$BUILD_DIR/libs/"
-fi
+cp -r "$REPO_DIR/build/release/libs/CallbackHandler-1.0" "$BUILD_DIR/libs/" 2>/dev/null || true
 
-# Copy LibSharedMedia
-if [ -d "$REPO_DIR/libs/LibSharedMedia-3.0" ]; then
-    cp -r "$REPO_DIR/libs/LibSharedMedia-3.0" "$BUILD_DIR/libs/"
-fi
-
-# Copy LibDualSpec
-if [ -d "$REPO_DIR/libs/LibDualSpec-1.0" ]; then
-    cp -r "$REPO_DIR/libs/LibDualSpec-1.0" "$BUILD_DIR/libs/"
-fi
-
-# Copy LibSpellRange
-if [ -d "$REPO_DIR/libs/LibSpellRange-1.0" ]; then
-    cp -r "$REPO_DIR/libs/LibSpellRange-1.0" "$BUILD_DIR/libs/"
-fi
-
-# Copy UTF8
-if [ -d "$REPO_DIR/libs/UTF8" ]; then
-    cp -r "$REPO_DIR/libs/UTF8" "$BUILD_DIR/libs/"
-fi
-
-# Modules
+# Modules (from repo)
 echo "Copying modules..."
 mkdir -p "$BUILD_DIR/modules"
 
@@ -75,15 +68,40 @@ MODULES=(
     "health"
     "power"
     "basecombopoints"
-)
+    "tags")
 
 for mod in "${MODULES[@]}"; do
     if [ -f "$REPO_DIR/modules/$mod.lua" ]; then
         cp "$REPO_DIR/modules/$mod.lua" "$BUILD_DIR/modules/"
-    else
-        echo "Warning: $mod.lua not found"
     fi
 done
+
+# Run linting on build output
+if [ "$LINT" = true ]; then
+    echo ""
+    echo "=== Running Lua Lint on Build ==="
+    LINT_FAILED=0
+    
+    # Lint all lua files
+    for f in $(find "$BUILD_DIR" -name "*.lua"); do
+        OUTPUT=$(luacheck "$f" --no-color 2>&1)
+        # Check for actual errors (not "0 errors")
+        if echo "$OUTPUT" | grep -qP "^\s*[1-9]\d* (error|warnings)"; then
+            echo "LINT ERROR in: $f"
+            echo "$OUTPUT" | head -3
+            LINT_FAILED=1
+        fi
+    done
+    
+    if [ "$LINT_FAILED" -eq 1 ]; then
+        echo ""
+        echo "=== LINT ERRORS FOUND - Fix before releasing! ==="
+        exit 1
+    else
+        echo "=== Lint Passed ==="
+    fi
+    echo ""
+fi
 
 # Count files
 FILE_COUNT=$(find "$BUILD_DIR" -type f | wc -l)
