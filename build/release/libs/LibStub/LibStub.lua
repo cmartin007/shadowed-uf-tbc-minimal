@@ -1,7 +1,8 @@
--- LibStub.lua - Minimal stub for loading
+-- LibStub.lua
 local LIBSTUB_MAJOR, LIBSTUB_MINOR = "LibStub", 2
 local LibStub = {}
 LibStub.minor = LIBSTUB_MINOR
+LibStub.objects = {}
 
 function LibStub:NewLibrary(major, minor)
     if self.objects[major] and self.objects[major].minor >= minor then
@@ -23,7 +24,10 @@ function LibStub:IterateLibraries()
     return pairs(self.objects)
 end
 
-LibStub.objects = {}
-setmetatable(LibStub, {__call = LibStub.NewLibrary})
+-- Pre-register common libraries
+LibStub:NewLibrary("LibSharedMedia-3.0", 1)
+LibStub:NewLibrary("LibDualSpec-1.0", 1)
+LibStub:NewLibrary("LibSpellRange-1.0", 1)
 
+setmetatable(LibStub, {__call = LibStub.NewLibrary})
 _G.LibStub = LibStub
