@@ -1,5 +1,5 @@
 -- SUF TBC Minimal - Hardcoded Config
--- No options menu - all settings are hardcoded
+-- Target: WoW Classic Anniversary TBC. No options menu - all settings are hardcoded.
 
 local _, SUF = ...
 local SUFconfig = {}

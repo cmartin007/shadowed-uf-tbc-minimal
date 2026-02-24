@@ -54,7 +54,8 @@ Always test changes locally before pushing to repo.
 
 ## 6. Keep API Reference Updated
 
-If you discover new WoW Classic APIs, add to `docs/API_REFERENCE.md`
+- Use [Battle.net WoW Classic Game Data APIs](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis) as the **source of truth** for API calls.
+- When you add or change API usage, document it in `docs/API_REFERENCE.md`.
 
 ---
 

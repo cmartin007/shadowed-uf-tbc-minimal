@@ -68,7 +68,7 @@
 
 **Documentation:**
 - `PHASE.md` - Project phases overview
-- `docs/API_REFERENCE.md` - WoW Classic TBC API reference
+- `docs/API_REFERENCE.md` - WoW Classic Anniversary TBC API reference
 - `docs/DEVELOPMENT.md` - Development notes
 
 ### 2026-02-24: Modified Files

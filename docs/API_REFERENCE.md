@@ -1,4 +1,31 @@
-# WoW Classic TBC API References
+# WoW Classic Anniversary TBC – API References
+
+**Target:** WoW Classic Anniversary TBC (anniversary re-release of Burning Crusade Classic).
+
+## Source of truth for API calls
+
+**Game Data APIs (REST)** – items, spells, realms, etc. when calling Blizzard services from outside the game:
+
+- **Official source of truth:** [Battle.net – WoW Classic Game Data APIs](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis)  
+  Use this for any HTTP/REST API usage (e.g. fetching item or spell data). The project should rely on Battle.net developer documentation for game data API contracts and endpoints.
+
+**In-game Lua API** – addon functions (e.g. `UnitAura`, `CreateFrame`) used inside the client:
+
+- Documented on [World of Warcraft API/Classic](https://warcraft.wiki.gg/wiki/World_of_Warcraft_API/Classic) and [UnitAura](https://warcraft.wiki.gg/wiki/UnitAura) (warcraft.wiki.gg). Cross-check with Battle.net Classic docs where they cover in-game APIs.
+
+## Classic vs retail – use these in WoW Classic Anniversary TBC
+
+| Use in Anniversary TBC | Do **not** use in Anniversary TBC |
+|------------------------|----------------------------------|
+| `UnitAura(unit, index [, filter])` | `C_UnitAuras.GetAuraDataByIndex()` – added 10.2.5 / 4.4.0 / 1.15.1 |
+| `UnitBuff` / `UnitDebuff` (aliases for UnitAura) | `C_UnitAuras.GetAuraDataBySpellName()` |
+| Manual iteration with `UnitAura(unit, i, "HARMFUL")` | `C_UnitAuras.GetDebuffDataByIndex()` – not in Anniversary TBC |
+| Plain `CreateFrame("Frame", ...)` + `SetBackdrop` | `AuraUtil.UnpackAuraData()` – retail/FrameXML only |
+| | `AuraUtil.ForEachAura` – not in Classic global API list |
+| | `BackdropTemplateMixin` / `"BackdropTemplate"` – retail |
+
+- **UnitAura** is documented as available in **3.0.2 / 1.13.2** and is the correct API for auras in WoW Classic Anniversary TBC. Debuff limit is **40** for Burning Crusade Classic.
+- **C_UnitAuras** and **AuraUtil** are not part of the Classic global API list for this client; use **UnitAura** and handle return values yourself.
 
 ## Official Blizzard APIs
 
@@ -18,8 +45,8 @@
 - `SecureUnitButton_OnClick()` - For targeting
 
 ### Combat APIs
-- `UnitAura(unit, index[, filter])` - Get auras/buffs/debuffs
-- `GetAuraInfo()` - Get detailed aura info
+- `UnitAura(unit, index[, filter])` - Get auras; returns `name, icon, count, dispelType, duration, expirationTime, source, ...` (use filter `"HELPFUL"` or `"HARMFUL"`).
+- `UnitBuff(unit, index [, filter])` / `UnitDebuff(unit, index [, filter])` - Aliases for UnitAura.
 - `CombatLogGetCurrentEvent()` - Combat log events
 
 ### Cast APIs
@@ -50,17 +77,18 @@
 - `UnitPowerBarMixin` - Power bar functionality
 - `HealthBarMixin` - Health bar functionality
 
-## Community Resources
+## Community & official resources
 
-### Warcraft.wiki.gg
+### Source of truth – Battle.net (game data / REST)
+- **WoW Classic Game Data APIs:** [community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis)  
+  Use this as the source of truth for any game data API calls (items, realms, etc.).
+
+### In-game Lua API (addon reference)
 - Main API: https://warcraft.wiki.gg/wiki/World_of_Warcraft_API/Classic
 - Unit: https://warcraft.wiki.gg/wiki/Unit
-- Events: https://warcraft.wiki.gg/wiki/Events
+- Events: https://warcraft.wiki.gg/wiki/Events/Classic
 
-### Battle.net Developer
-- Game Data APIs: https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis
-
-## TBC Classic Specific
+## WoW Classic Anniversary TBC – specifics
 
 ### Power Types (TBC)
 - `0` - Mana
@@ -69,13 +97,13 @@
 - `3` - Energy
 - `4` - Happiness
 
-### Class IDs
+### Class IDs (TBC – no Death Knight)
 - `1` - Warrior
 - `2` - Paladin
 - `3` - Hunter
 - `4` - Rogue
 - `5` - Priest
-- `6` - Death Knight
+- `6` - (unused in TBC)
 - `7` - Shaman
 - `8` - Mage
 - `9` - Warlock

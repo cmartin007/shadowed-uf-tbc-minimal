@@ -1,7 +1,7 @@
 # SUF TBC Minimal - Development Notes
 
 ## Project Goal
-Lightweight, fast unit frames for WoW Classic TBC
+Lightweight, fast unit frames for **WoW Classic Anniversary TBC** (anniversary re-release of Burning Crusade Classic)
 
 ## Core Principles
 1. Speed first - Every feature must not impact performance
@@ -19,11 +19,11 @@ Lightweight, fast unit frames for WoW Classic TBC
 - `modules/health.lua` - Health bar
 - `modules/power.lua` - Power bar
 
-### Unit Frame Types (TBC)
+### Unit Frame Types (Anniversary TBC)
 - `player` - Player frame
 - `target` - Target frame
 
-### Removed for TBC
+### Removed for Anniversary TBC
 - Arena frames (not in Classic)
 - Boss frames (use target)
 - Raid frames (separate addon)
@@ -77,5 +77,10 @@ SUFconfig = {
 - [ ] Memory < 5MB
 
 ## Links
-- Blizzard API: https://warcraft.wiki.gg/wiki/World_of_Warcraft_API/Classic
-- Battle.net: https://community.developer.battle.net/docs/world-of-warcraft-classic
+- **Source of truth for API calls:** [Battle.net – WoW Classic Game Data APIs](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis)
+- In-game Lua API (addon reference): https://warcraft.wiki.gg/wiki/World_of_Warcraft_API/Classic
+- Battle.net WoW Classic docs: https://community.developer.battle.net/documentation/world-of-warcraft-classic
+
+## Testing Blizzard API (GET/POST)
+
+The **test/** folder contains unit tests that call the Battle.net WoW Classic Game Data APIs over HTTP. See **test/README.md** for setup (credentials, `pip install -r test/requirements.txt`) and run with `pytest test/ -v` from the repo root.

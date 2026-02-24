@@ -108,4 +108,4 @@ ShadowedUnitFrames/
 - [ ] Phase 2: Add cast bar
 - [ ] Phase 2: Add simplified auras
 - [ ] Phase 3: Add fader
-- [ ] Test on WoW Classic TBC
+- [ ] Test on WoW Classic Anniversary TBC

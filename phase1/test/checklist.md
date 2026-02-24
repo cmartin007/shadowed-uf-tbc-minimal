@@ -1,6 +1,6 @@
 # Phase 1 Test Checklist
 
-## WoW Classic TBC Testing
+## WoW Classic Anniversary TBC Testing
 
 ### Load Test
 - [ ] Addon loads without errors

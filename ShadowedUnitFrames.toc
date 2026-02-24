@@ -1,6 +1,6 @@
 ## Interface: 110207
 ## Title: Shadowed Unit Frames TBC Minimal
-## Notes: Lightweight unit frames for WoW Classic TBC
+## Notes: Lightweight unit frames for WoW Classic Anniversary TBC
 ## Author: Shadowed (Modified by Berber)
 ## Version: 1.0.0
 ## SavedVariables: ShadowedUFDB
