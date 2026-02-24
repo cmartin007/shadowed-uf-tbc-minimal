@@ -17,6 +17,7 @@ Config.lua
 
 # Modules (Player + Target only)
 modules\helpers.lua
+modules\tags.lua
 modules\units.lua
 modules\layout.lua
 modules\movers.lua
