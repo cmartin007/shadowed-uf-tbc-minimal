@@ -1,18 +1,18 @@
-## Interface: 20505
+## Interface: 110207
 ## Title: Shadowed Unit Frames TBC Minimal
 ## Notes: Lightweight unit frames for WoW Classic Anniversary TBC
 ## Author: Shadowed (Modified by Berber)
 ## Version: 1.0.0
 ## SavedVariables: ShadowedUFDB
+## OptionalDeps: LibSharedMedia-3.0, LibSpellRange-1.0, LibDualSpec-1.0
 
-# Embedded Libraries
+# Libraries (embedded)
 libs\LibStub\LibStub.lua
-libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
-libs\AceGUI-3.0.lua
-libs\AceDB-3.0.lua
-libs\AceEvent-3.0.lua
-libs\LibSharedMedia-3.0.lua
-libs\LibDualSpec-1.0.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\LibSharedMedia-3.0\lib.xml
+libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
+libs\LibSpellRange-1.0\lib.xml
+libs\UTF8\utf8.lua
 
 # Core
 localization\enUS.lua
@@ -22,7 +22,6 @@ Config.lua
 
 # Modules (Player + Target only)
 modules\helpers.lua
-modules\tags.lua
 modules\units.lua
 modules\layout.lua
 modules\movers.lua
