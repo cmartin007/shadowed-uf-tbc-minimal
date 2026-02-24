@@ -3,14 +3,15 @@ local MAJOR, MINOR = "CallbackHandler-1.0", 1
 
 local Callbacks = {}
 Callbacks.handlers = {}
-Callbacks.eventFrame = CreateFrame("Frame")
-Callbacks.eventFrame:RegisterEvent("PLAYER_LOGIN")
 
-function Callbacks:OnEvent(self, event, ...)
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("PLAYER_LOGIN")
+
+eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
-        -- Done loading
+        -- Player logged in
     end
-end
+end)
 
 function Callbacks:Register(event, handler)
     self.handlers[event] = handler
