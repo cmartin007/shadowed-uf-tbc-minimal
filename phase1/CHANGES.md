@@ -93,11 +93,23 @@
 - `modules/helpers.lua` (874B)
 - `modules/basecombopoints.lua` (6.4KB)
 
+### 2026-02-24: Phase 1 Complete – proof screenshot
+- Added **phase1/review/phase1-unit-frames-proof.png**: in-game screenshot (Hellfire Peninsula) showing player and pet unit frames with health/power bars and tags working.
+- Marked Phase 1 **APPROVE** in phase1/review/decision.md; PROGRESS.md Phase 1 set to COMPLETE.
+
+### 2026-02-24: Phase 1 Review (vs current project)
+
+**Findings:**
+- Layout and all unit positions are defined in **modules/defaultlayout.lua** (`config.positions`), not in Config.lua. ShadowedUnitFrames.lua always calls `LoadDefaultLayout()` on init; nothing reads `_G.SUFconfig`. Config.lua is currently unused.
+- **tags.lua** was re-added and is required for layout text ([name], [afk], [curmaxhp], etc.). Phase 1 strip list had listed it for removal; the project keeps it.
+- units.lua still contains all unit types; player+target MVP is achieved via defaultlayout and hidden defaults, not by stripping units.lua to two units.
+- See **phase1/review/decision.md** for full review, success criteria, and doc updates needed.
+
 ## To Do
 
 - [ ] Test addon loads in WoW
-- [ ] Simplify units.lua (remove party/raid references)
-- [ ] Simplify main core if needed
+- [ ] Align phase1 docs (tasks.md, strip.md) with current layout source (defaultlayout.lua) and keep tags.lua
+- [ ] Simplify units.lua (optional; party/raid refs kept for AFK/visibility) or document as intentional
 
 ## Size Reduction
 

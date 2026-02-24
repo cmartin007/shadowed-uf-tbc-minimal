@@ -2,6 +2,12 @@
 
 **This project is for WoW Classic Anniversary TBC ONLY.** Do not add retail-only APIs or code paths for other game versions.
 
+## Philosophy
+- **Speed first** - Every feature must not impact performance
+- **Robust** - No fragile code, edge cases handled
+- **Minimal** - Only essential features
+- **Hardcoded** - User config saved to variables, no options menu
+
 ## 1. Always Update CHANGES.md
 
 **Before any commit, you MUST update `phase1/CHANGES.md`** (or the relevant phase folder).
@@ -28,7 +34,7 @@ After any phase change, update `PROGRESS.md` in the root:
 - Note what's working/broken
 - Update next action
 
-## 2. Phase Structure
+## 3. Phase Structure
 
 Each phase (phase1/phase2/phase3) must have:
 - `plan/tasks.md` - What to do
@@ -37,29 +43,29 @@ Each phase (phase1/phase2/phase3) must have:
 - `review/decision.md` - Approval
 - `CHANGES.md` - Change log
 
-## 3. Commit Message Format
+## 4. Commit Message Format
 
 Use clear, descriptive commit messages:
 - `Phase1: Description`
 - `Fix: Issue description`
 - `Docs: What was added`
 
-## 4. Test Before Push
+## 5. Test Before Push
 
 Always test changes locally before pushing to repo.
 
-## 5. No Breaking Changes
+## 6. No Breaking Changes
 
 - Don't remove features without discussion
 - Document any config changes
-- Update Config.lua if adding new settings
+- Layout and settings live in modules/defaultlayout.lua; update that file if adding new layout/settings
 
-## 6. Keep API Reference Updated
+## 7. Keep API Reference Updated
 
 - Use [Battle.net WoW Classic Game Data APIs](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis) as the **source of truth** for API calls.
 - When you add or change API usage, document it in `docs/API_REFERENCE.md`.
 
-## 7. TBC Anniversary Compatibility Rules
+## 8. TBC Anniversary Compatibility Rules
 
 - **No retail-only APIs**
   - Do **not** use `C_UnitAuras`, `AuraUtil.*`, `GetSpecialization`, `GetSpecializationInfoByID`, or other retail-only globals.
@@ -91,7 +97,7 @@ Always test changes locally before pushing to repo.
   - In **Register()**, if the path is under `ShadowedUnitFrames\\media`, replace it with the built-in fallback for that type so layout’s Register calls for removed addon assets still yield a valid path.
   - **Layout CheckMedia()** fallbacks must **not** reference `Interface\\AddOns\\ShadowedUnitFrames\\media\\...`. Use built-in paths only (e.g. statusbar default `Interface\\TargetingFrame\\UI-StatusBar`, font default `Fonts\\FRIZQT__.ttf`).
 
-## 8. Findings / Gotchas
+## 9. Findings / Gotchas
 
 - **Deploying to WoW**
   - Use `./build/copy-to-wow.sh` to copy `build/release/` into the WoW addon folder. Default target: `C:\Program Files (x86)\World of Warcraft\_anniversary_\Interface\AddOns\ShadowedUnitFrames` (WSL path: `/mnt/c/Program Files (x86)/World of Warcraft/_anniversary_/Interface/AddOns/ShadowedUnitFrames`). Override with `WOW_ADDON_DIR=/path ./build/copy-to-wow.sh`. Run `./build/build.sh` first.
@@ -109,6 +115,14 @@ Always test changes locally before pushing to repo.
 - **AceDB `global`**
   - If any code uses `ShadowUF.db.global` (e.g. **ShowInfoPanel** uses `db.global.infoID`), the AceDB defaults passed to `:New()` must include a **`global`** table. If defaults only have `profile`, `db.global` is nil and indexing it (e.g. `db.global.infoID`) errors at runtime.
 
+- **Auras: anchor points and layout**
+  - WoW `Frame:SetPoint()` accepts only **full** point names (e.g. `BOTTOMLEFT`), not shorthand (`BL`). Layout and defaultlayout use shorthand (BL, TR, TL, etc.). **`ShadowUF.ResolveAnchorPoints(anchorPoint)`** in **defaultlayout.lua** converts shorthand to full names using `Layout:GetRelative()`; use it whenever passing an anchor point to `SetPoint` in auras (or any module using layout anchor keys).
+  - When **LoadDefaultLayout(useMerge)** runs with `useMerge = true`, units that already have dimensions are **skipped** for the full merge. To make defaultlayout aura edits (e.g. anchorPoint, x, y) apply anyway, **finalizeData** in defaultlayout.lua merges **auras** from the default config into those units in an `elseif` branch so aura layout is always applied.
+
+- **Auras: OmniCC and borders**
+  - **OmniCC** (and similar addons) attach to **Cooldown** frames. Each aura icon slot has a `Cooldown` frame covering the icon; `SetCooldown(start, duration)` is called when the aura has a duration so OmniCC can show its timer. Built-in duration text is hidden when a cooldown is set to avoid double timers.
+  - **Aura icon borders** are drawn in **auras.lua** via `addIconBorder(slot)` (four edge textures) and `setIconBorderColor(slot, auraType, kind)` (debuff type color for debuffs). **Unit frame** borders are controlled by **backdrop.edgeSize** and **backdrop.borderTexture** in layout; set `edgeSize = 0` or `borderTexture = "None"` in defaultlayout and layout logic clears `edgeFile` so no frame border is drawn.
+
 ---
 
-**Last Updated:** 2026-02-24
+**Last Updated:** 2026-02-25

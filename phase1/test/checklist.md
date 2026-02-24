@@ -13,8 +13,8 @@
 - [ ] Health bar color is green
 - [ ] Power bar shows correct power %
 - [ ] Power bar shows correct power type (mana/rage/energy)
-- [ ] Frame is positioned correctly (bottom center)
-- [ ] Frame size is correct (200x50)
+- [ ] Frame is positioned correctly (per defaultlayout.lua `config.positions.player`)
+- [ ] Frame size is correct (per defaultlayout.lua; e.g. 190x45)
 
 ### Target Frame Test
 - [ ] Target frame appears when targeting NPC/mob
@@ -23,8 +23,8 @@
 - [ ] Health bar color is green
 - [ ] Power bar shows correct power %
 - [ ] Target name displays correctly
-- [ ] Frame is positioned correctly (right of player)
-- [ ] Frame size is correct (200x50)
+- [ ] Frame is positioned correctly (per defaultlayout.lua `config.positions.target`, right of player)
+- [ ] Frame size is correct (per defaultlayout.lua; e.g. 190x45)
 
 ### Combat Test
 - [ ] Health bar updates during combat

@@ -1,5 +1,23 @@
 local L = ShadowUF.L
-local playerClass = select(2, UnitClass("player"))
+local Layout = ShadowUF.Layout
+local _playerClass = select(2, UnitClass("player"))
+
+-- WoW SetPoint() only accepts full region names; layout uses short codes (BL, TR, etc.)
+local SHORT_POINT_TO_FULL = {
+	BL = "BOTTOMLEFT", BR = "BOTTOMRIGHT", TL = "TOPLEFT", TR = "TOPRIGHT",
+	L = "LEFT", R = "RIGHT", T = "TOP", B = "BOTTOM", C = "CENTER",
+}
+function ShadowUF.ResolveAnchorPoints(anchorPoint)
+	local key = anchorPoint or "BL"
+	local p, r = Layout:GetPoint(key), Layout:GetRelative(key)
+	if not p or (not SHORT_POINT_TO_FULL[p] and #p <= 3) then
+		p = SHORT_POINT_TO_FULL[key] or "BOTTOMLEFT"
+	end
+	if not r or (not SHORT_POINT_TO_FULL[r] and #r <= 3) then
+		r = SHORT_POINT_TO_FULL[key] or "BOTTOMLEFT"
+	end
+	return p or "BOTTOMLEFT", r or "BOTTOMLEFT"
+end
 
 local function finalizeData(config, useMerge)
 	local self = ShadowUF
@@ -50,6 +68,11 @@ local function finalizeData(config, useMerge)
 				if( useMerge and self.db.profile.positions[unit].point == "" and self.db.profile.positions[unit].relativePoint == "" and self.db.profile.positions[unit].anchorPoint == "" and self.db.profile.positions[unit].x == 0 and self.db.profile.positions[unit].y == 0 ) then
 					self.db.profile.positions[unit] = config.positions[unit]
 				end
+			elseif( useMerge and child.auras ) then
+				-- Unit was skipped (already has dimensions), but always apply default aura layout so edits to defaultlayout.lua auras take effect
+				local dest = self.db.profile.units[unit].auras
+				if not dest then dest = {}; self.db.profile.units[unit].auras = dest end
+				mergeToChild(child.auras, dest, true)
 			end
 		end
 	end
@@ -93,7 +116,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 	}
 	config.backdrop = {
 		tileSize = 1,
-		edgeSize = 5,
+		edgeSize = 0,
 		clip = 1,
 		inset = 3,
 		backgroundTexture = "Chat Frame",
@@ -200,13 +223,13 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 
 	config.positions = {
 		targettargettarget = {anchorPoint = "RC", anchorTo = "#SUFUnittargettarget", x = 0, y = 0},
-		targettarget = {anchorPoint = "TL", anchorTo = "#SUFUnittarget", x = 0, y = 0},
+		targettarget = {anchorPoint = "BL", anchorTo = "#SUFUnittarget", x = 0, y = 0},
 		focustarget = {anchorPoint = "TL", anchorTo = "#SUFUnitfocus", x = 0, y = 0},
 		party = {point = "TOPLEFT", anchorTo = "#SUFUnitplayer", relativePoint = "TOPLEFT", movedAnchor = "TL", x = 0, y = -60},
 		focus = {anchorPoint = "RB", anchorTo = "#SUFUnittarget", x = 35, y = -4},
 		target = {anchorPoint = "RC", anchorTo = "#SUFUnitplayer", x = 50, y = 0},
 		player = {point = "CENTER", anchorTo = "UIParent", relativePoint = "CENTER", y = -190, x = -89},
-		pet = {anchorPoint = "TL", anchorTo = "#SUFUnitplayer", x = 0, y = 0},
+		pet = {anchorPoint = "BL", anchorTo = "#SUFUnitplayer", x = 0, y = 0},
 		pettarget = {anchorPoint = "C", anchorTo = "UIParent", x = 0, y = 0},
 		partypet = {anchorPoint = "RB", anchorTo = "$parent", x = 0, y = 0},
 		partytarget = {anchorPoint = "RT", anchorTo = "$parent", x = 0, y = 0},
@@ -365,8 +388,8 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				sumPending = {enabled = true, anchorPoint = "C", size = 40, x = 0, y = 0, anchorTo = "$parent"},
 			},
 			auras = {
-				buffs = {enabled = false, maxRows = 1},
-				debuffs = {enabled = false, maxRows = 1},
+				buffs = {enabled = false, maxRows = 1, perRow = 8, size = 18, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
+				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 18, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
 			},
 			text = {
 				{text = "[(()afk() )][name]"},
@@ -832,14 +855,13 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				petBattle = {enabled = true, anchorPoint = "BL", size = 18, x = -6, y = 14, anchorTo = "$parent"}
 			},
 			auras = {
-				buffs = {enabled = true},
-				debuffs = {enabled = true},
+				buffs = {enabled = true, maxRows = 1, perRow = 8, size = 14, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = -30},
+				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 18, anchorPoint = "TL", anchorTo = "$parent", x = 0, y = 0},
 			},
 			text = {
 				{text = "[(()afk() )][name]"},
 				{text = "[curmaxhp]"},
 				{text = "[level( )][classification( )][perpp]", width = 0.50},
-				{text = "[curmaxpp]", anchorTo = "$powerBar", width = 0.60},
 				{text = "[(()afk() )][name]"},
 				{text = ""},
 			},

@@ -48,7 +48,6 @@ rm modules/range.lua
 rm modules/runes.lua
 rm modules/shaman.lua
 rm modules/soulshards.lua
-rm modules/tags.lua
 rm modules/totems.lua
 rm modules/xp.lua
 ```
@@ -59,6 +58,7 @@ rm modules/xp.lua
 - ShadowedUnitFrames.xml
 - modules/units.lua
 - modules/layout.lua
+- modules/tags.lua (required for [name], [afk], [curmaxhp], etc.)
 - modules/health.lua
 - modules/power.lua
 - modules/basecombopoints.lua

@@ -23,10 +23,6 @@ for f in "$REPO_DIR"/modules/*.lua; do
     fi
 done
 
-# Lint Config.lua
-echo "Checking Config.lua..."
-luacheck "$REPO_DIR/Config.lua" --codes --no-color 2>&1 | tee -a "$LINT_DIR/config.log" || true
-
 # Summary
 echo ""
 echo "=== Lint Summary ==="

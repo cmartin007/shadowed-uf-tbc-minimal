@@ -1,110 +1,53 @@
--- Luacheck configuration for SUF TBC Minimal
--- https://luacheck.readthedocs.io/
+-- Luacheck config for Shadowed Unit Frames TBC Minimal (WoW addon).
+-- WoW provides many globals at runtime; declare them so luacheck doesn't warn.
 
--- Define all WoW globals to suppress false positives
+std = "lua51"
+max_line_length = 400
+
+-- Writable globals (addon namespace, slash commands, etc.)
+globals = {
+    "ShadowUF", "SUFconfig", "CONFIGMODE_CALLBACKS", "_G",
+    "SLASH_SHADOWEDUF1", "SLASH_SHADOWEDUF2", "SLASH_SHADOWEDUF3", "SLASH_SHADOWEDUF4",
+    "SlashCmdList", "ClickCastFrames",
+}
+
+-- Read-only globals provided by WoW client at runtime
 read_globals = {
-    -- Unit APIs
-    "UnitHealth", "UnitHealthMax", "UnitPower", "UnitPowerMax", "UnitPowerType",
-    "UnitName", "UnitExists", "UnitIsUnit", "UnitReaction", "UnitTarget",
-    "UnitCastingInfo", "UnitChannelInfo", "UnitAura", "GetAuraInfo",
-    "CombatLogGetCurrentEvent", "UnitClassification", "UnitLevel",
-    "UnitDebuff", "UnitBuff", "UnitGUID", "UnitIsPlayer", "UnitIsFriend",
-    "UnitPlayerControlled", "UnitIsPVPSanctuary", "UnitIsDeadOrGhost",
-    "UnitInVehicle", "UnitHasVehicleUI", "UnitUsingVehicle",
-    "IsUnitOnQuest", "GetQuestsCompleted",
-    
-    -- Frame APIs  
-    "CreateFrame", "SecureMixin", "Mixin", "RegisterStateDriver", "UnregisterStateDriver",
-    "UIParent", "GameFontHighlight", "GameFontNormal", "GameFontHighlightSmall",
-    "RegisterUnitWatch", "UnregisterUnitWatch",
-    
-    -- Spell/Item APIs
-    "GetSpellInfo", "GetItemInfo", "GetItemIcon", "GetTexCoords", "GetActionInfo",
-    "IsSpellKnown", "IsPlayerSpell",
-    
-    -- Timer APIs
-    "C_Timer", "GetTime", "time",
-    
-    -- Math
-    "floor", "ceil", "sqrt", "abs", "random", "math", "string", "table",
-    
-    -- Utility
-    "tinsert", "tremove", "wipe", "pairs", "ipairs", "type", "tostring", "tonumber",
-    "select", "strfind", "strsub", "strlower", "strupper", "gmatch", "gsub", "format",
-    "date", "next", "pcall", "error",
-    
-    -- Ace/Lib
-    "LibStub", "AceAddon", "AceGUI", "AceDB", "AceEvent", "AceHook",
-    
-    -- WoW globals
-    "ChatFrame1", "DEFAULT_CHAT_FRAME", "UnitPopupMenus", "UIF",
-    "InCombatLockdown", "HasVehicleUI",
-    
-    -- Constants
-    "MAX_PARTY_MEMBERS", "MAX_RAID_MEMBERS", "MAX_BOSS_FRAMES", "MAX_ARENA_ENEMIES",
-    "COMBATLOG_FILTER_ME", "COMBATLOG_FILTER_MY_PET", "COMBATLOG_FILTER_HOSTILE_PLAYERS",
-    "LE_AURA_TYPE_BUFF", "LE_AURA_TYPE_DEBUFF",
-    
-    -- C_ APIs
-    "C_UnitAuras", "C_Timer", "C_MountJournal", "C_Item", "C_Spell",
-    "C_QuestLog", "C_Map", "C_News", "AuraUtil",
-    "C_ArtifactUI", "C_AzeriteEmpoweredItem", "C_AzeriteItem",
-    
-    -- Build
-    "GetBuildInfo", "GetBuildNumber",
-    
-    -- Instance
-    "IsInInstance", "CanHearthAndResurrectFromArea",
-    
-    -- PvP
-    "GetBattlefieldScore", "GetNumBattlefieldScores", "GetArenaOpponentSpec",
-    "GetNumArenaOpponentSpecs",
-    
-    -- The addon global itself
-    "ShadowUF", "ShadowedUF", "SUF",
+    -- Unit / API
+    "UnitClass", "UnitRace", "UnitHealth", "UnitHealthMax", "UnitPower", "UnitPowerMax",
+    "UnitPowerType", "UnitName", "UnitExists", "UnitIsUnit", "UnitTarget", "UnitAura",
+    "UnitBuff", "UnitDebuff", "UnitCastingInfo", "UnitChannelInfo", "UnitIsAFK", "UnitIsConnected",
+    "UnitIsFriend", "UnitIsPlayer", "UnitLevel", "UnitClassification", "UnitReaction",
+    "UnitHasVehicleUI", "UnitHasVehiclePlayerFrameUI", "GetTime", "GetBuildInfo",
+    "CreateFrame", "RegisterEvent", "UIParent", "InCombatLockdown",
+    "PlayerFrame", "TargetFrame", "PetFrame", "FocusFrame", "PartyFrame",
+    "PlayerCastingBarFrame", "PetCastingBarFrame", "BuffFrame", "DebuffFrame",
+    "RuneFrame", "WarlockPowerFrame", "MonkHarmonyBarFrame", "PaladinPowerBarFrame",
+    "MageArcaneChargesFrame", "EssencePlayerFrame", "ComboFrame", "TargetFrameToT",
+    "FocusFrameToT", "AlternatePowerBar", "PlayerPowerBarAlt",
+    "BossTargetFrameContainer", "CompactPartyFrame", "CompactRaidFrameManager",
+    "CompactRaidFrameContainer", "CompactRaidFrameManager_GetSetting", "CompactRaidFrameManager_SetSetting",
+    "ArenaEnemyFramesContainer", "ArenaEnemyPrepFramesContainer", "ArenaEnemyMatchFramesContainer",
+    "GameTooltip", "UnitFrame_OnEnter", "UnitFrame_OnLeave",
+    "RAID_CLASS_COLORS", "CLASS_SORT_ORDER", "LOCALIZED_CLASS_NAMES_MALE",
+    "MAX_COMBO_POINTS", "MAX_PARTY_MEMBERS", "MAX_RAID_MEMBERS", "MAX_BOSS_FRAMES",
+    "MEMBERS_PER_RAID_GROUP", "GetMaxLevelForPlayerExpansion", "PET_TYPE_SUFFIX",
+    "SecureButton_GetModifiedUnit", "SecureHandler_OnLoad", "ClickCastHeader",
+    "hooksecurefunc", "DebuffTypeColor", "BackdropTemplateMixin",
+    "C_AddOns", "Enum", "IsPlayerSpell", "IsSpellKnown",
+    "RegisterUnitWatch", "UnregisterUnitWatch", "RegisterStateDriver",
+    "IsInInstance", "CanHearthAndResurrectFromArea", "GetNumArenaOpponentSpecs",
+    "UnitIsDeadOrGhost", "DEFAULT_CHAT_FRAME", "time",
+    "CopyTable", "LibStub", "UnitGUID", "C_Timer", "GetArenaOpponentSpec",
+    "UnitThreatSituation", "UnitPlayerControlled", "UnitIsTapDenied", "UnitCanAttack",
+    "UnitPlayerOrPetInRaid", "UnitPlayerOrPetInParty", "AuraUtil", "C_UnitAuras",
+    "GetLocale", "GetSpecializationInfoByID", "format", "pairs", "ipairs", "select", "type", "tostring",
+    "next", "rawget", "rawset", "setmetatable", "getmetatable", "error", "pcall",
+    "table", "string", "math", "print", "_G",
 }
 
--- Also allow setting these
-write_globals = {
-    "ShadowUF", "ShadowedUF", "SUF",
+-- Allow unused args in callbacks (common in WoW addons)
+ignore = {
+    "212",  -- unused argument
+    "213",  -- unused loop variable
 }
-
--- Files to ignore
-exclude_files = {
-    "test/",
-    "docs/",
-    "phase1/",
-    "phase2/",
-    "phase3/",
-    "build/",
-    "libs/",
-}
-
--- Disable noisy warnings
-disable = {
-    "111", -- setting non-standard global
-    "112", -- mutating non-standard global  
-    "113", -- accessing undefined variable
-    "122", -- globals accessed but not set
-    "124", -- setting read-only global
-    "211", -- unused function
-    "212", -- unused function argument
-    "213", -- unused loop variable
-    "214", -- unused table field
-    "215", -- unused
-    "311", -- trailing whitespace
-    "321", -- shadowing declaration
-    "331", -- shadowing upvalue
-    "411", -- shadowing global
-    "421", -- shadowing
-    "431", -- shadowing
-    "432", -- shadowing
-    "511", -- shadowing
-    "521", -- shadowing
-    "531", -- shadowing
-    "581", -- shadowing a variable
-    "631", -- line too long (WoW tables are long)
-}
-
--- Don't limit line length for this project
-max_line_length = false

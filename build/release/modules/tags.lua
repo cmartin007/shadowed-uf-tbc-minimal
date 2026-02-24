@@ -83,10 +83,10 @@ function Tags:Register(frame, fontString, config)
     local tagString = (type(config) == "string") and config or (config and config.text) or ""
     fontString._suf_frame = frame
     fontString._suf_tagString = tagString
-    fontString.UpdateTags = function(self)
-        local f = self._suf_frame
+    fontString.UpdateTags = function(fontStr)
+        local f = fontStr._suf_frame
         local unit = f and f.unit
-        self:SetText(formatTagString(unit, self._suf_tagString or ""))
+        fontStr:SetText(formatTagString(unit, fontStr._suf_tagString or ""))
     end
 end
 

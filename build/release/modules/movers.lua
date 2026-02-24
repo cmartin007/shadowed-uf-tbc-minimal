@@ -4,8 +4,8 @@ local Movers = {}
 local originalEnvs = {}
 local unitConfig = {}
 local attributeBlacklist = {["showplayer"] = true, ["showraid"] = true, ["showparty"] = true, ["showsolo"] = true, ["initial-unitwatch"] = true}
-local playerClass = select(2, UnitClass("player"))
-local noop = function() end
+local _playerClass = select(2, UnitClass("player"))
+local _noop = function() end
 local OnDragStop, OnDragStart, configEnv
 ShadowUF:RegisterModule(Movers, "movers")
 
@@ -152,7 +152,7 @@ local function createConfigEnv()
 		end,
 	}, {
 		__index = _G,
-		__newindex = function(tbl, key, value) _G[key] = value end,
+		__newindex = function(tbl, key, value) rawset(_G, key, value) end,
 	})
 end
 
@@ -323,6 +323,14 @@ end
 
 function Movers:Disable()
 	if( not self.isEnabled ) then return nil end
+
+	-- Do not touch secure unit frames while in combat; this would taint protected headers
+	if( InCombatLockdown() ) then
+		if( DEFAULT_CHAT_FRAME ) then
+			DEFAULT_CHAT_FRAME:AddMessage(L["Cannot lock unit frames while in combat. Try again after you leave combat."])
+		end
+		return
+	end
 
 	for func, env in pairs(originalEnvs) do
 		setfenv(func, env)

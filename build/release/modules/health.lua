@@ -8,19 +8,18 @@ local function getGradientColor(unit)
 	if( percent >= 1 ) then return ShadowUF.db.profile.healthColors.green.r, ShadowUF.db.profile.healthColors.green.g, ShadowUF.db.profile.healthColors.green.b end
 	if( percent == 0 ) then return ShadowUF.db.profile.healthColors.red.r, ShadowUF.db.profile.healthColors.red.g, ShadowUF.db.profile.healthColors.red.b end
 
-	local sR, sG, sB, eR, eG, eB = 0, 0, 0, 0, 0, 0
-	local modifier, inverseModifier = percent * 2, 0
+	local sR, sG, sB, eR, eG, eB
+	local modifier
 	if( percent > 0.50 ) then
 		sR, sG, sB = ShadowUF.db.profile.healthColors.green.r, ShadowUF.db.profile.healthColors.green.g, ShadowUF.db.profile.healthColors.green.b
 		eR, eG, eB = ShadowUF.db.profile.healthColors.yellow.r, ShadowUF.db.profile.healthColors.yellow.g, ShadowUF.db.profile.healthColors.yellow.b
-
-		modifier = modifier - 1
+		modifier = percent * 2 - 1
 	else
 		sR, sG, sB = ShadowUF.db.profile.healthColors.yellow.r, ShadowUF.db.profile.healthColors.yellow.g, ShadowUF.db.profile.healthColors.yellow.b
 		eR, eG, eB = ShadowUF.db.profile.healthColors.red.r, ShadowUF.db.profile.healthColors.red.g, ShadowUF.db.profile.healthColors.red.b
+		modifier = percent * 2
 	end
-
-	inverseModifier = 1 - modifier
+	local inverseModifier = 1 - modifier
 	return eR * inverseModifier + sR * modifier, eG * inverseModifier + sG * modifier, eB * inverseModifier + sB * modifier
 end
 

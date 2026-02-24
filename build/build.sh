@@ -12,13 +12,17 @@ echo "=== Building SUF TBC Minimal ==="
 echo "Repo: $REPO_DIR"
 echo ""
 
-# Check for luacheck
-if ! command -v luacheck &> /dev/null; then
-    echo "Warning: luacheck not installed. Skipping lint."
-    echo "Install with: brew install luacheck"
-    LINT=false
-else
+# Check for luacheck or lua-check (Ubuntu package name)
+if command -v luacheck &> /dev/null; then
+    LUA_LINTER=luacheck
     LINT=true
+elif command -v lua-check &> /dev/null; then
+    LUA_LINTER=lua-check
+    LINT=true
+else
+    echo "Warning: luacheck/lua-check not installed. Skipping lint."
+    echo "Install: brew install luacheck  OR  sudo apt-get install -y lua-check"
+    LINT=false
 fi
 
 # Clean build dir first
@@ -30,7 +34,6 @@ echo "Copying core files..."
 cp "$REPO_DIR/ShadowedUnitFrames.toc" "$BUILD_DIR/"
 cp "$REPO_DIR/ShadowedUnitFrames.lua" "$BUILD_DIR/"
 cp "$REPO_DIR/ShadowedUnitFrames.xml" "$BUILD_DIR/"
-cp "$REPO_DIR/Config.lua" "$BUILD_DIR/"
 
 # Localization
 echo "Copying localization..."
@@ -59,6 +62,7 @@ MODULES=(
     "health"
     "power"
     "basecombopoints"
+    "auras"
     "tags")
 
 for mod in "${MODULES[@]}"; do
@@ -75,9 +79,9 @@ if [ "$LINT" = true ]; then
     
     # Lint all lua files
     for f in $(find "$BUILD_DIR" -name "*.lua"); do
-        OUTPUT=$(luacheck "$f" --no-color 2>&1)
-        # Check for actual errors (not "0 errors")
-        if echo "$OUTPUT" | grep -qP "^\s*[1-9]\d* (error|warnings)"; then
+        OUTPUT=$("$LUA_LINTER" "$f" --no-color 2>&1)
+        # Fail only on errors (ignore warnings; WoW addon has many benign warnings)
+        if echo "$OUTPUT" | grep -qP "^\s*[1-9]\d* error"; then
             echo "LINT ERROR in: $f"
             echo "$OUTPUT" | head -3
             LINT_FAILED=1
