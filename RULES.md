@@ -18,6 +18,14 @@ Example:
 - Removed: old.lua - not needed
 ```
 
+## 2. Always Update PROGRESS.md
+
+After any phase change, update `PROGRESS.md` in the root:
+- Mark tasks as complete/in-progress
+- Update current phase status
+- Note what's working/broken
+- Update next action
+
 ## 2. Phase Structure
 
 Each phase (phase1/phase2/phase3) must have:
