@@ -1,21 +1,30 @@
--- CallbackHandler-1.0 - Minimal stub
-local CallbackHandler = {}
-CallbackHandler VERSION = 1
+-- CallbackHandler-1.0
+local MAJOR, MINOR = "CallbackHandler-1.0", 1
 
-function CallbackHandler:OnUsed(target, eventname, handler)
-    target[eventname] = handler
+local Callbacks = {}
+Callbacks.handlers = {}
+Callbacks.eventFrame = CreateFrame("Frame")
+Callbacks.eventFrame:RegisterEvent("PLAYER_LOGIN")
+
+function Callbacks:OnEvent(self, event, ...)
+    if event == "PLAYER_LOGIN" then
+        -- Done loading
+    end
 end
 
-function CallbackHandler:OnUnused(target, eventname)
-    target[eventname] = nil
+function Callbacks:Register(event, handler)
+    self.handlers[event] = handler
 end
 
-local eventtarget = setmetatable({}, {__index = function(t, event) 
-    local f = function() end
-    t[event] = f
-    return f
-end})
-
-_G.CallbackHandler_1.0 = function(name,RegisterDispatcher,OnUsed,OnUnused)
-    return CallbackHandler
+function Callbacks:Fire(event, ...)
+    local handler = self.handlers[event]
+    if handler then
+        handler(...)
+    end
 end
+
+function Callbacks:Unregister(event)
+    self.handlers[event] = nil
+end
+
+_G.CallbackHandler_1.0 = Callbacks
