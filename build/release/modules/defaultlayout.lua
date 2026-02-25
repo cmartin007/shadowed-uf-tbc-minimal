@@ -125,7 +125,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 		borderColor = {r = 0.30, g = 0.30, b = 0.50, a = 1},
 	}
 	config.hidden = {
-		cast = false, buffs = false, party = true, player = true, pet = true, target = true, focus = true, boss = true, arena = true, playerAltPower = false, playerPower = true
+		cast = true, buffs = false, party = true, player = true, pet = true, target = true, focus = true, boss = true, arena = true, playerAltPower = false, playerPower = true
 	}
 	config.font = {
 		name = "Myriad Condensed Web",
@@ -364,7 +364,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			height = 45,
 			scale = 1.0,
 			portrait = {enabled = true, fullAfter = 50},
-			castBar = {order = 60},
+			castBar = {enabled = true, order = 60},
 			xpBar = {order = 55},
 			fader = {enabled = false, combatAlpha = 1.0, inactiveAlpha = 0.6},
 			runeBar = {enabled = true, background = false, height = 0.40, order = 70},
@@ -845,7 +845,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			incHeal = {cap = 1},
 			incAbsorb = {cap = 1},
 			healAbsorb = {cap = 1},
-			castBar = {order = 60},
+			castBar = {enabled = true, order = 60},
 			comboPoints = {enabled = false, anchorTo = "$parent", order = 60, anchorPoint = "BR", x = -3, y = 8, size = 14, spacing = -4, growth = "LEFT", isBar = true, height = 0.40},
 			indicators = {
 				lfdRole = {enabled = false},
@@ -855,8 +855,8 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				petBattle = {enabled = true, anchorPoint = "BL", size = 18, x = -6, y = 14, anchorTo = "$parent"}
 			},
 			auras = {
-				buffs = {enabled = true, maxRows = 1, perRow = 8, size = 14, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = -30},
-				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 18, anchorPoint = "TL", anchorTo = "$parent", x = 0, y = 0},
+				buffs = {enabled = true, maxRows = 1, perRow = 10, size = 12, anchorPoint = "BL", anchorTo = "$healthBar", x = 0, y = -60},
+				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 14, anchorPoint = "TL", anchorTo = "$healthBar", x = 0, y = 5},
 			},
 			text = {
 				{text = "[(()afk() )][name]"},

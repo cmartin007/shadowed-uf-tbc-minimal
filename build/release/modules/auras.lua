@@ -67,6 +67,8 @@ end
 local function createIconSlot(parent, size, index)
 	local slot = CreateFrame("Frame", nil, parent)
 	slot:SetSize(size, size)
+	slot:EnableMouse(true)
+	slot.index = index
 	slot.icon = slot:CreateTexture(nil, "ARTWORK")
 	slot.icon:SetAllPoints()
 	slot.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
@@ -81,6 +83,24 @@ local function createIconSlot(parent, size, index)
 	slot.duration:SetPoint("TOP", slot, "BOTTOM", 0, 0)
 	slot.duration:SetText("")
 	addIconBorder(slot)
+	slot:SetScript("OnEnter", function(self)
+		local container = self:GetParent()
+		local frame = container:GetParent()
+		local unit = frame and frame.unit
+		if not unit or not UnitExists(unit) or (GameTooltip.IsForbidden and GameTooltip:IsForbidden()) then return end
+		if not GameTooltip.SetUnitAura then return end
+		local idx = self.index
+		local kind = container.kind
+		local filter = (kind == "buffs") and "HELPFUL" or "HARMFUL"
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetUnitAura(unit, idx, filter)
+		GameTooltip:Show()
+	end)
+	slot:SetScript("OnLeave", function()
+		if not (GameTooltip.IsForbidden and GameTooltip:IsForbidden()) then
+			GameTooltip:Hide()
+		end
+	end)
 	slot:Hide()
 	return slot
 end
@@ -129,16 +149,16 @@ local function getAuraByIndex(unit, kind, index)
 		if not auraData then return nil end
 		local name, icon, count, _, duration, expirationTime = AuraUtil.UnpackAuraData(auraData)
 		local auraType = auraData.dispelName
-		return name, icon, count, duration, expirationTime, auraType
+		return name, nil, icon, count, duration, expirationTime, auraType
 	end
 
 	if kind == "buffs" then
-		local name, _, icon, count, _, duration, expirationTime = UnitBuff(unit, index)
-		return name, icon, count, duration, expirationTime, nil
+		local name, rank, icon, count, _, duration, expirationTime = UnitBuff(unit, index)
+		return name, rank, icon, count, duration, expirationTime, nil
 	end
 
-	local name, _, icon, count, auraType, duration, expirationTime = UnitDebuff(unit, index)
-	return name, icon, count, duration, expirationTime, auraType
+	local name, rank, icon, count, auraType, duration, expirationTime = UnitDebuff(unit, index)
+	return name, rank, icon, count, duration, expirationTime, auraType
 end
 
 local function updateAuraList(frame, kind)
@@ -159,7 +179,7 @@ local function updateAuraList(frame, kind)
 			break
 		end
 
-		local name, icon, count, duration, expirationTime, auraType = getAuraByIndex(unit, kind, i)
+		local name, rank, icon, count, duration, expirationTime, auraType = getAuraByIndex(unit, kind, i)
 		if not name then
 			slots[i]:Hide()
 			break
@@ -213,8 +233,16 @@ function Auras:OnEnable(frame)
 		if cfg then
 			local container = CreateFrame("Frame", nil, parent)
 			container:SetSize(1, 1)
+			container.kind = kind
 			local pointAnchor, relativeAnchor = ShadowUF.ResolveAnchorPoints(cfg.anchorPoint)
-			container:SetPoint(pointAnchor, parent, relativeAnchor, cfg.x or 0, cfg.y or 0)
+			local anchorTo = parent
+			if cfg.anchorTo == "$parent" then
+				anchorTo = parent
+			elseif cfg.anchorTo and string.sub(cfg.anchorTo, 1, 1) == "$" then
+				local key = string.sub(cfg.anchorTo, 2)
+				anchorTo = parent[key] or parent
+			end
+			container:SetPoint(pointAnchor, anchorTo, relativeAnchor, cfg.x or 0, cfg.y or 0)
 			container.icons = {}
 			local maxSlots = (cfg.perRow or DEFAULT_PER_ROW) * (cfg.maxRows or 1)
 			for i = 1, maxSlots do

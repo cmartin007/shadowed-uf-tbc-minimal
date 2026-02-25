@@ -72,6 +72,11 @@
 - `PLAYER_REGEN_DISABLED/ENABLED` - Combat state
 - `UNIT_SPELLCAST_START/SUCCESS/FAIL` - Cast events
 
+### Cast events: test in your build
+Spellcast event names and whether they support **unit** registration (`RegisterUnitEvent`) can differ by build. To see what your client supports, run the scripts in **`docs/test_cast_events.md`** in chat (with SUF loaded for the unit-event test). Record which events are "OK" for `RegisterEvent` and which are "unit OK" for `RegisterUnitEvent`; the cast module can use that to choose normal vs unit registration per event.
+
+**TBC Anniversary (tested):** `UNIT_SPELLCAST_FAIL` does **not** exist (RegisterEvent gives "unknown event"). The cast module does not register it. `UNIT_SPELLCAST_INTERRUPTED` registers OK; the cast module uses it so the bar hides immediately on interrupt. Cast stop/fail is handled via `UNIT_SPELLCAST_STOP` and `UnitCastingInfo(unit)` returning nil.
+
 ### Useful Mixins
 - `SecureMixin(frame)` - Make frame secure
 - `UnitPowerBarMixin` - Power bar functionality

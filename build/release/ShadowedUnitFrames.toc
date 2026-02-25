@@ -29,4 +29,5 @@ modules\defaultlayout.lua
 modules\health.lua
 modules\power.lua
 modules\basecombopoints.lua
+modules\cast.lua
 modules\auras.lua

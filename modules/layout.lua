@@ -511,7 +511,7 @@ function Layout:PositionWidgets(frame, config)
 	for key, module in pairs(ShadowUF.modules) do
 		if( config[key] and not config[key].height ) then config[key].height = 0.50 end
 
-		if( ( module.moduleHasBar or config[key] and config[key].isBar ) and frame[key] and frame[key]:IsShown() and config[key].height > 0 ) then
+		if( ( module.moduleHasBar or config[key] and config[key].isBar ) and frame[key] and frame[key]:IsShown() and config[key].height > 0 and not ( key == "castBar" and ( frame.unitType == "player" or frame.unitType == "target" ) ) ) then
 			totalWidgetWeight = totalWidgetWeight + config[key].height
 			totalBars = totalBars + 1
 

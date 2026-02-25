@@ -57,20 +57,36 @@ end
 function Health:UpdateAura(frame)
 	local hadDebuff = frame.healthBar.hasDebuff
 	frame.healthBar.hasDebuff = nil
-	if( UnitIsFriend(frame.unit, "player") ) then
+	if not UnitIsFriend(frame.unit, "player") then
+		if hadDebuff ~= frame.healthBar.hasDebuff then
+			self:UpdateColor(frame)
+		end
+		return
+	end
+	-- Prefer TBC API (UnitDebuff) for compatibility; use C_UnitAuras path when available
+	if C_UnitAuras and C_UnitAuras.GetDebuffDataByIndex and AuraUtil and AuraUtil.UnpackAuraData then
 		local id = 0
-		while( true ) do
+		while true do
 			id = id + 1
-			local name, _, _, auraType = AuraUtil.UnpackAuraData(C_UnitAuras.GetDebuffDataByIndex(frame.unit, id))
-			if( not name ) then break end
-
-			if( canCure[auraType] ) then
+			local auraData = C_UnitAuras.GetDebuffDataByIndex(frame.unit, id)
+			if not auraData then break end
+			local name, _, _, auraType = AuraUtil.UnpackAuraData(auraData)
+			if not name then break end
+			if canCure[auraType] then
 				frame.healthBar.hasDebuff = auraType
 				break
 			end
 		end
+	else
+		for i = 1, 40 do
+			local name, _, _, dispelType = UnitDebuff(frame.unit, i, "HARMFUL")
+			if not name then break end
+			if dispelType and canCure[dispelType] then
+				frame.healthBar.hasDebuff = dispelType
+				break
+			end
+		end
 	end
-
 	if hadDebuff ~= frame.healthBar.hasDebuff then
 		self:UpdateColor(frame)
 	end

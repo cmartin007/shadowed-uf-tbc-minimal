@@ -41,7 +41,7 @@ function ShadowUF:OnInitialize()
 			range = {},
 			filters = {zonewhite = {}, zoneblack = {}, zoneoverride = {}, whitelists = {}, blacklists = {}, overridelists = {}},
 			visibility = {arena = {}, pvp = {}, party = {}, raid = {}, neighborhood = {}},
-			hidden = {cast = false, playerPower = true, buffs = false, party = true, raid = false, player = true, pet = true, target = true, focus = true, boss = true, arena = true, playerAltPower = false},
+			hidden = {cast = true, playerPower = true, buffs = false, party = true, raid = false, player = true, pet = true, target = true, focus = true, boss = true, arena = true, playerAltPower = false},
 		},
 		global = {
 			infoID = 0,
@@ -712,7 +712,7 @@ end
 local active_hiddens = {}
 function ShadowUF:HideBlizzardFrames()
 	if( self.db.profile.hidden.cast and not active_hiddens.cast ) then
-		hideBlizzardFrames(true, PlayerCastingBarFrame, PetCastingBarFrame)
+		hideBlizzardFrames(true, _G.PlayerCastingBarFrame, _G.PetCastingBarFrame)
 	end
 
 	if( self.db.profile.hidden.party and not active_hiddens.party ) then

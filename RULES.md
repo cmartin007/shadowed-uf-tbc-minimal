@@ -68,8 +68,9 @@ Always test changes locally before pushing to repo.
 ## 8. TBC Anniversary Compatibility Rules
 
 - **No retail-only APIs**
-  - Do **not** use `C_UnitAuras`, `AuraUtil.*`, `GetSpecialization`, `GetSpecializationInfoByID`, or other retail-only globals.
-  - Use `UnitAura` / `UnitBuff` / `UnitDebuff` and other TBC-compatible APIs as documented in `docs/API_REFERENCE.md`.
+  - Do **not** use `GetSpecialization` (nil in TBC Anniversary; verify with `/run print(type(GetSpecialization))`).
+  - `GetSpecializationInfoByID` is present as a function in at least one TBC Anniversary build; you may use it if needed. When in doubt, verify in your client.
+  - **Auras:** `C_UnitAuras` and `AuraUtil` are present in at least one TBC Anniversary build (verify in your client with `/run print("C_UnitAuras:", type(C_UnitAuras), "AuraUtil:", type(AuraUtil))`). You may use them when present. For compatibility across builds, prefer `UnitAura` / `UnitBuff` / `UnitDebuff` as documented in `docs/API_REFERENCE.md`; if you rely on `C_UnitAuras`/`AuraUtil`, guard with a nil check or provide a fallback using the UnitAura family.
 
 - **Libs must match TOC + usage**
   - Every path in `ShadowedUnitFrames.toc` must point to an existing file (especially under `libs/`).
@@ -98,6 +99,9 @@ Always test changes locally before pushing to repo.
   - **Layout CheckMedia()** fallbacks must **not** reference `Interface\\AddOns\\ShadowedUnitFrames\\media\\...`. Use built-in paths only (e.g. statusbar default `Interface\\TargetingFrame\\UI-StatusBar`, font default `Fonts\\FRIZQT__.ttf`).
 
 ## 9. Findings / Gotchas
+
+- **Verifying globals in your build**
+  - API availability can differ by TBC Anniversary build. To check whether a global exists in your client, run e.g. `/run print("C_UnitAuras:", type(C_UnitAuras), "AuraUtil:", type(AuraUtil))` in chat. Use an addon like **GlobalDump** (WoWInterface) to dump the full `_G` table if you need to compare builds.
 
 - **Deploying to WoW**
   - Use `./build/copy-to-wow.sh` to copy `build/release/` into the WoW addon folder. Default target: `C:\Program Files (x86)\World of Warcraft\_anniversary_\Interface\AddOns\ShadowedUnitFrames` (WSL path: `/mnt/c/Program Files (x86)/World of Warcraft/_anniversary_/Interface/AddOns/ShadowedUnitFrames`). Override with `WOW_ADDON_DIR=/path ./build/copy-to-wow.sh`. Run `./build/build.sh` first.

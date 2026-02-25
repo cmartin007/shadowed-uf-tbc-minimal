@@ -62,6 +62,7 @@ MODULES=(
     "health"
     "power"
     "basecombopoints"
+    "cast"
     "auras"
     "tags")
 
@@ -79,7 +80,7 @@ if [ "$LINT" = true ]; then
     
     # Lint all lua files
     for f in $(find "$BUILD_DIR" -name "*.lua"); do
-        OUTPUT=$("$LUA_LINTER" "$f" --no-color 2>&1)
+        OUTPUT=$("$LUA_LINTER" "$f" --no-color 2>&1) || true
         # Fail only on errors (ignore warnings; WoW addon has many benign warnings)
         if echo "$OUTPUT" | grep -qP "^\s*[1-9]\d* error"; then
             echo "LINT ERROR in: $f"
@@ -90,10 +91,10 @@ if [ "$LINT" = true ]; then
     
     if [ "$LINT_FAILED" -eq 1 ]; then
         echo ""
-        echo "=== LINT ERRORS FOUND - Fix before releasing! ==="
+        echo "=== Lint: FAILED (errors found) - Fix before releasing! ==="
         exit 1
     else
-        echo "=== Lint Passed ==="
+        echo "=== Lint: OK (no errors) ==="
     fi
     echo ""
 fi

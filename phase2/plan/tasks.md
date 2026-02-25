@@ -15,7 +15,7 @@ Add a cast bar (player and target) and a simplified aura display using **TBC-onl
   - **OnEnable:** Create `frame.castBar` via `ShadowUF.Units:CreateBar(frame)`; create optional icon and name/time font strings per `db.profile.units[unitType].castBar` (defaultlayout already defines castBar with name/time).
   - **Events:** Register for `UNIT_SPELLCAST_START`, `UNIT_SPELLCAST_STOP`, `UNIT_SPELLCAST_FAIL`, `UNIT_SPELLCAST_INTERRUPTED`, `UNIT_SPELLCAST_DELAYED`, `UNIT_SPELLCAST_CHANNEL_START`, `UNIT_SPELLCAST_CHANNEL_STOP`, `UNIT_SPELLCAST_CHANNEL_UPDATE` (or equivalent TBC event names; verify in client).
   - **Update:** Use `UnitCastingInfo(unit)` and `UnitChannelInfo(unit)` to drive bar value, max, and text. Cast = 0→1 over time; channel = 1→0. Set bar color from `db.profile.castColors` (cast vs channel vs interruptible).
-  - **Visibility:** Show bar only when casting/channeling; hide when not. Respect `db.profile.hidden.cast` (core already hides Blizzard cast bar when that is set).
+  - **Visibility:** Show bar only when casting/channeling; hide when not. `hidden.cast` controls only Blizzard cast bar hiding (in core); SUF cast bar is always shown when casting.
 - [ ] Add **cast bar to TOC** and to **`build/build.sh`** module list so it is copied into `build/release`.
 - [ ] Ensure **defaultlayout.lua** keeps castBar config for player/target (already present); enable castBar for units where it should show (e.g. player, target, focus if desired).
 
@@ -37,7 +37,7 @@ Add a cast bar (player and target) and a simplified aura display using **TBC-onl
 - [x] **defaultlayout.lua:** ResolveAnchorPoints added; full aura config for target/parent; auras merged for skipped units; target/targettarget positions swapped. Auras enabled for target (and player) with icon display.
 
 ### 2.4 Integration and Cleanup
-- [ ] **ShadowedUnitFrames.lua:** Defaults already include `castBar` and `hidden.cast`. Ensure cast bar is shown when `hidden.cast` is false and castBar module is loaded.
+- [ ] **ShadowedUnitFrames.lua:** Defaults include `castBar` and `hidden.cast`. `hidden.cast = true` by default hides Blizzard player/pet cast bar only; SUF cast bar shows whenever unit is casting (cast module does not check `hidden.cast`).
 - [ ] Remove or guard any other **retail-only API** use (e.g. `ShadowUF.UnitAuraBySpell` uses `C_UnitAuras`; either make it TBC-safe or restrict to addons that don’t call it in TBC).
 - [ ] **Build:** Run `./build/build.sh` and confirm no missing module errors; run in WoW and confirm no Lua errors.
 
