@@ -16,19 +16,6 @@ function Layout:MediaForced(mediaType)
 	end
 end
 
-local function loadMedia(type, name, default)
-	if( name == "" ) then return "" end
-
-	local media = SML:Fetch(type, name, true)
-	if( not media ) then
-		mediaRequired = mediaRequired or {}
-		mediaRequired[type] = name
-		return default
-	end
-
-	return media
-end
-
 -- Updates the background table
 local function updateBackdrop()
 	-- Update the backdrop table
@@ -50,13 +37,12 @@ local function updateBackdrop()
 	backdropTbl.insets.bottom = backdrop.inset
 end
 
--- Tries to load media, if it fails it will default to built-in (TBC minimal: no addon media folder)
 function Layout:CheckMedia()
-	mediaPath[SML.MediaType.STATUSBAR] = loadMedia(SML.MediaType.STATUSBAR, ShadowUF.db.profile.bars.texture, "Interface\\TargetingFrame\\UI-StatusBar")
-	mediaPath[SML.MediaType.FONT] = loadMedia(SML.MediaType.FONT, ShadowUF.db.profile.font.name, "Fonts\\FRIZQT__.ttf")
-	mediaPath[SML.MediaType.BACKGROUND] = loadMedia(SML.MediaType.BACKGROUND, ShadowUF.db.profile.backdrop.backgroundTexture, "Interface\\ChatFrame\\ChatFrameBackground")
-	mediaPath[SML.MediaType.BORDER] = loadMedia(SML.MediaType.BORDER, ShadowUF.db.profile.backdrop.borderTexture, "Interface\\Tooltips\\UI-Tooltip-Border")
-
+	-- TBC Minimal: use only Blizzard built-in media, do not depend on external LibSharedMedia contents
+	mediaPath.statusbar = "Interface\\TargetingFrame\\UI-StatusBar"
+	mediaPath.font = "Fonts\\FRIZQT__.ttf"
+	mediaPath.background = "Interface\\ChatFrame\\ChatFrameBackground"
+	mediaPath.border = "Interface\\Tooltips\\UI-Tooltip-Border"
 	updateBackdrop()
 end
 
@@ -153,27 +139,16 @@ function Layout:Load(frame)
 	ShadowUF:FireModuleEvent("OnLayoutApplied", frame, unitConfig)
 end
 
--- Register it on file load because authors seem to do a bad job at registering the callbacks
-SML = LibStub:GetLibrary("LibSharedMedia-3.0")
-SML:Register(SML.MediaType.FONT, "Myriad Condensed Web", "Interface\\AddOns\\ShadowedUnitFrames\\media\\fonts\\Myriad Condensed Web.ttf")
-SML:Register(SML.MediaType.BORDER, "Square Clean", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\ABFBorder")
-SML:Register(SML.MediaType.BACKGROUND, "Chat Frame", "Interface\\ChatFrame\\ChatFrameBackground")
-SML:Register(SML.MediaType.STATUSBAR, "BantoBar", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\banto")
-SML:Register(SML.MediaType.STATUSBAR, "Smooth",   "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\smooth")
-SML:Register(SML.MediaType.STATUSBAR, "Smooth v2","Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\Smoothv2")
-SML:Register(SML.MediaType.STATUSBAR, "Smoother", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\smoother")
-SML:Register(SML.MediaType.STATUSBAR, "Perl",     "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\perl")
-SML:Register(SML.MediaType.STATUSBAR, "Glaze",    "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\glaze")
-SML:Register(SML.MediaType.STATUSBAR, "Charcoal", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\Charcoal")
-SML:Register(SML.MediaType.STATUSBAR, "Otravi",   "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\otravi")
-SML:Register(SML.MediaType.STATUSBAR, "Striped",  "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\striped")
-SML:Register(SML.MediaType.STATUSBAR, "LiteStep", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\LiteStep")
-SML:Register(SML.MediaType.STATUSBAR, "Aluminium", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\Aluminium")
-SML:Register(SML.MediaType.STATUSBAR, "Minimalist", "Interface\\AddOns\\ShadowedUnitFrames\\media\\textures\\Minimalist")
-
 function Layout:LoadSML()
-	SML.RegisterCallback(self, "LibSharedMedia_Registered", "MediaRegistered")
-	SML.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaForced")
+	-- Try to hook external LibSharedMedia-3.0 if it exists; otherwise just use built-in media
+	local ok, lib = pcall(LibStub.GetLibrary, LibStub, "LibSharedMedia-3.0", true)
+	if ok and lib then
+		SML = lib
+		if SML.RegisterCallback then
+			SML.RegisterCallback(self, "LibSharedMedia_Registered", "MediaRegistered")
+			SML.RegisterCallback(self, "LibSharedMedia_SetGlobal", "MediaForced")
+		end
+	end
 	self:CheckMedia()
 end
 
@@ -381,7 +356,8 @@ function Layout:SetupBars(frame, config)
 			end
 
 			if( ( widget:IsShown() or ( not frame[key].visibilityManaged and module.defaultVisibility == false ) ) and widget.SetStatusBarTexture ) then
-				widget:SetStatusBarTexture(mediaPath.statusbar)
+				local tex = mediaPath.statusbar or "Interface\\TargetingFrame\\UI-StatusBar"
+				widget:SetStatusBarTexture(tex)
 				widget:GetStatusBarTexture():SetHorizTile(false)
 
 				widget:SetOrientation(config[key].vertical and "VERTICAL" or "HORIZONTAL")
@@ -390,7 +366,8 @@ function Layout:SetupBars(frame, config)
 
 			if( widget.background ) then
 				if( config[key].background or config[key].invert ) then
-					widget.background:SetTexture(mediaPath.statusbar)
+					local tex = mediaPath.statusbar or "Interface\\TargetingFrame\\UI-StatusBar"
+					widget.background:SetTexture(tex)
 					widget.background:SetHorizTile(false)
 					widget.background:Show()
 
@@ -412,7 +389,8 @@ function Layout:SetupFontString(fontString, extraSize)
 	local size = ShadowUF.db.profile.font.size + (extraSize or 0)
 	if( size <= 0 ) then size = 1 end
 
-	fontString:SetFont(mediaPath.font, size, ShadowUF.db.profile.font.extra)
+	local font = mediaPath.font or "Fonts\\FRIZQT__.ttf"
+	fontString:SetFont(font, size, ShadowUF.db.profile.font.extra)
 
 	if( ShadowUF.db.profile.font.shadowColor and ShadowUF.db.profile.font.shadowX and ShadowUF.db.profile.font.shadowY ) then
 		fontString:SetShadowColor(ShadowUF.db.profile.font.shadowColor.r, ShadowUF.db.profile.font.shadowColor.g, ShadowUF.db.profile.font.shadowColor.b, ShadowUF.db.profile.font.shadowColor.a)

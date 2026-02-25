@@ -6,13 +6,10 @@
 ## SavedVariables: ShadowedUFDB
 ## OptionalDeps: LibSharedMedia-3.0, LibSpellRange-1.0
 
-# Libraries (embedded)
-libs\LibStub\LibStub.lua
-libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
-libs\LibSharedMedia-3.0.lua
-libs\LibSpellRange-1.0.lua
-libs\UTF8.lua
-libs\AceDB-3.0.lua
+# Libraries: Ace3 (LibStub, CallbackHandler, AceDB)
+libs\Ace3\LibStub\LibStub.lua
+libs\Ace3\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\Ace3\AceDB-3.0\AceDB-3.0.xml
 
 # Core
 localization\enUS.lua
@@ -24,7 +21,6 @@ modules\tags.lua
 modules\helpers.lua
 modules\units.lua
 modules\layout.lua
-modules\movers.lua
 modules\defaultlayout.lua
 modules\health.lua
 modules\power.lua

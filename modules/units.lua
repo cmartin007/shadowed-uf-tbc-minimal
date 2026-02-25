@@ -977,6 +977,18 @@ function Units:LoadUnit(unit)
 	frame:SetAttribute("unit", unit)
 	frame.hasStateWatch = unit == "pet"
 
+	-- Apply layout and visibility so bars/text are created (otherwise frame stays black)
+	frame.unitType = unit
+	frame.unit = unit
+	frame.unitOwner = unit
+	frame.unitRealType = unit
+	frameList[frame] = true
+	unitFrames[unit] = frame
+	frame:SetVisibility()
+	ShadowUF.Layout:Load(frame)
+	frame.unitInitialized = true
+	frame:FullUpdate()
+
 	-- Annd lets get this going
 	RegisterUnitWatch(frame, frame.hasStateWatch)
 end

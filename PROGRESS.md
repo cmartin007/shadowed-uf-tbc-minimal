@@ -60,10 +60,11 @@
 ---
 
 ## What's Working
-- Core files retained: units, layout, health, power, movers, defaultlayout, helpers, basecombopoints, tags, **cast**, auras
+- Core files retained: units, layout, health, power, defaultlayout, helpers, basecombopoints, tags, **cast**, auras
 - Addon runs in WoW without errors; player, pet, and target unit frames display correctly (see phase1/review/phase1-unit-frames-proof.png)
 - **Phase 2 auras:** Auras module with buff/debuff icons (TBC UnitBuff/UnitDebuff), positioning from defaultlayout (anchorPoint, x, y), debuff-type borders, OmniCC-compatible Cooldown frame; unit frame borders disabled (backdrop edgeSize 0); target/targettarget positions swapped (ToT top, target below). **Mouseover tooltips** via `GameTooltip:SetUnitAura` (rank-correct). **Alignment:** Target auras use `anchorTo = "$healthBar"` so icons start on the same x axis as the health bar.
 - **Phase 2 cast bar:** Cast bar for player and target (UnitCastingInfo/UnitChannelInfo); name and time text; castColors; **detached** 80px below player and target frames; **smooth animation** via shared UIParent updater frame; **spark** at fill edge; **2px dark yellow border**; no background (transparent unfilled). **Blizzard cast bar:** Default `hidden.cast = true` hides Blizzard player/pet cast bar only; SUF cast bars are independent and always show when casting. Health dispel color uses UnitDebuff when C_UnitAuras/AuraUtil absent.
+- **Combo points:** Player combo points handled by `modules/basecombopoints.lua` as a dedicated widget; detached row of small round red dots anchored just above the player health bar, shown only when the player has combo points (rogue/cat).
 
 ## Next Action
 Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras. Run `phase2/test/checklist.md` then complete `phase2/review/decision.md`.

@@ -33,6 +33,10 @@ end
 local altColor = {}
 function Power:UpdateColor(frame)
 	local powerID, currentType, altR, altG, altB = UnitPowerType(frame.unit)
+	-- Druid player: always show mana bar (user tracks rage/energy elsewhere)
+	if frame.unit == "player" and select(2, UnitClass("player")) == "DRUID" then
+		powerID, currentType = 0, "MANA"
+	end
 	frame.powerBar.currentType = currentType
 
 	-- Overridden power types like Warlock pets, or Ulduar vehicles use "POWER_TYPE_#####" but triggers power events with "ENERGY", so this fixes that
@@ -96,7 +100,17 @@ function Power:Update(frame, event, unit, powerType)
 	if( event and powerType and powerType ~= frame.powerBar.currentType ) then return end
 	if( frame.powerBar.minusMob ) then return end
 
-	frame.powerBar.currentPower = UnitPower(frame.unit)
-	frame.powerBar:SetMinMaxValues(0, UnitPowerMax(frame.unit))
-	frame.powerBar:SetValue(UnitIsDeadOrGhost(frame.unit) and 0 or not UnitIsConnected(frame.unit) and 0 or frame.powerBar.currentPower)
+	-- Druid player: always show mana (power type 0); rage/energy tracked elsewhere
+	local pwr, pwrMax
+	if frame.unit == "player" and select(2, UnitClass("player")) == "DRUID" then
+		pwr = UnitPower(frame.unit, 0)
+		pwrMax = UnitPowerMax(frame.unit, 0)
+	else
+		pwr = UnitPower(frame.unit)
+		pwrMax = UnitPowerMax(frame.unit)
+	end
+
+	frame.powerBar.currentPower = pwr
+	frame.powerBar:SetMinMaxValues(0, pwrMax)
+	frame.powerBar:SetValue(UnitIsDeadOrGhost(frame.unit) and 0 or not UnitIsConnected(frame.unit) and 0 or pwr)
 end

@@ -74,6 +74,12 @@ local function finalizeData(config, useMerge)
 				if not dest then dest = {}; self.db.profile.units[unit].auras = dest end
 				mergeToChild(child.auras, dest, true)
 			end
+			-- Always apply castBar from defaultlayout so detachedWidth, detachedHeight, detachedAnchor take effect (even when unit was skipped or profile has old data)
+			if( child.castBar and self.db.profile.units[unit] ) then
+				local dest = self.db.profile.units[unit].castBar
+				if not dest then dest = {}; self.db.profile.units[unit].castBar = dest end
+				mergeToChild(child.castBar, dest, true)
+			end
 		end
 	end
 
@@ -228,7 +234,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 		party = {point = "TOPLEFT", anchorTo = "#SUFUnitplayer", relativePoint = "TOPLEFT", movedAnchor = "TL", x = 0, y = -60},
 		focus = {anchorPoint = "RB", anchorTo = "#SUFUnittarget", x = 35, y = -4},
 		target = {anchorPoint = "RC", anchorTo = "#SUFUnitplayer", x = 50, y = 0},
-		player = {point = "CENTER", anchorTo = "UIParent", relativePoint = "CENTER", y = -190, x = -89},
+		player = {point = "CENTER", anchorTo = "UIParent", relativePoint = "CENTER", y = -175, x = -89},
 		pet = {anchorPoint = "BL", anchorTo = "#SUFUnitplayer", x = 0, y = 0},
 		pettarget = {anchorPoint = "C", anchorTo = "UIParent", x = 0, y = 0},
 		partypet = {anchorPoint = "RB", anchorTo = "$parent", x = 0, y = 0},
@@ -364,7 +370,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			height = 45,
 			scale = 1.0,
 			portrait = {enabled = true, fullAfter = 50},
-			castBar = {enabled = true, order = 60},
+			castBar = {enabled = true, order = 60, detachedWidth = 300, detachedHeight = 20, detachedAnchor = { point = "TOP", relativePoint = "BOTTOM", x = 125, y = -75 }},
 			xpBar = {order = 55},
 			fader = {enabled = false, combatAlpha = 1.0, inactiveAlpha = 0.6},
 			runeBar = {enabled = true, background = false, height = 0.40, order = 70},
@@ -372,7 +378,8 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			druidBar = {enabled = true, background = true, height = 0.40, order = 70},
 			priestBar = {enabled = true, background = true, height = 0.40, order = 70},
 			shamanBar = {enabled = true, background = true, height = 0.40, order = 70},
-			comboPoints = {enabled = true, anchorTo = "$parent", order = 60, anchorPoint = "BR", x = -3, y = 8, size = 14, spacing = -4, growth = "LEFT", isBar = true, height = 0.40},
+			-- Combo points: detached icon row anchored above the player health bar
+			comboPoints = {enabled = true, anchorTo = "$healthBar", order = 60, anchorPoint = "TC", x = 2, y = 14, size = 22, spacing = -2, growth = "RIGHT", isBar = false, height = 0.40},
 			auraPoints = {enabled = false, showAlways = true, anchorTo = "$parent", order = 60, anchorPoint = "BR", x = -3, y = 8, size = 14, spacing = -4, growth = "LEFT", isBar = true, height = 0.40},
 			staggerBar = {enabled = true, background = true, height = 0.30, order = 70},
 			soulShards = {anchorTo = "$parent", order = 60, height = 0.40, anchorPoint = "BR", x = -8, y = 6, size = 12, spacing = -2, growth = "LEFT", isBar = true, showAlways = true},
@@ -389,7 +396,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			},
 			auras = {
 				buffs = {enabled = false, maxRows = 1, perRow = 8, size = 18, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
-				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 18, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
+				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 17, anchorPoint = "BR", anchorTo = "$parent", x = -192, y = 41},
 			},
 			text = {
 				{text = "[(()afk() )][name]"},
@@ -838,6 +845,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			},
 		},
 		target = {
+			enabled = true,
 			width = 190,
 			height = 45,
 			scale = 1.0,
@@ -845,7 +853,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			incHeal = {cap = 1},
 			incAbsorb = {cap = 1},
 			healAbsorb = {cap = 1},
-			castBar = {enabled = true, order = 60},
+			castBar = {enabled = true, order = 60, detachedWidth = 300, detachedHeight = 18, detachedAnchor = { point = "TOP", relativePoint = "BOTTOM", x = -115, y = 100}},
 			comboPoints = {enabled = false, anchorTo = "$parent", order = 60, anchorPoint = "BR", x = -3, y = 8, size = 14, spacing = -4, growth = "LEFT", isBar = true, height = 0.40},
 			indicators = {
 				lfdRole = {enabled = false},
@@ -861,8 +869,8 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			text = {
 				{text = "[(()afk() )][name]"},
 				{text = "[curmaxhp]"},
-				{text = "[level( )][classification( )][perpp]", width = 0.50},
-				{text = "[(()afk() )][name]"},
+				{text = "[level( )][perpp]", width = 0.50},
+				{text = "[curmaxpp]"},
 				{text = ""},
 			},
 		},
@@ -945,6 +953,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			},
 		},
 		targettarget = {
+			enabled = true,
 			width = 110,
 			height = 30,
 			scale = 1.0,

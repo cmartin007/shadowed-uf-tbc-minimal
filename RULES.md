@@ -8,6 +8,8 @@
 - **Minimal** - Only essential features
 - **Hardcoded** - User config saved to variables, no options menu
 
+For a systematic list of features that may be removed or simplified, see **docs/CULL_INVESTIGATION.md**. Use it to prioritize culls and keep the codebase minimal. **Before removing any feature, confirm it is not listed in docs/ESSENTIAL_FEATURES.md** (required features that must not be culled).
+
 ## 1. Always Update CHANGES.md
 
 **Before any commit, you MUST update `phase1/CHANGES.md`** (or the relevant phase folder).
@@ -77,6 +79,12 @@ Always test changes locally before pushing to repo.
   - If you add or rename a stub in `libs/`, update the TOC and `build/build.sh` so the release build stays in sync.
   - Prefer **removing** unused libs (e.g. dual-spec) over stubbing them when the feature does not exist in TBC Anniversary.
 
+- **Do NOT damage other addons or pollute the game**
+  - **Never ship your own replacements** for shared libraries that other addons rely on (e.g. do not bundle a private `LibSharedMedia-3.0` or override Ace3’s `LibStub` / `AceDB-3.0` APIs). Use the official Ace3 copies under `libs/Ace3/` and consume external libs via `LibStub("LibName", true)` without re‑registering them.
+  - Do **not** register bogus textures, fonts, or sounds into global media registries (LibSharedMedia) that point at removed or addon‑local paths; always register only valid, stable, built‑in paths or skip registration entirely.
+  - SUF must **never change global defaults** for other addons (e.g. no `SetStatusBarTexture` on global frames, no “set global media” calls that affect nameplates or Blizzard bars).
+  - When in doubt, err on the side of *local only*: restrict changes to SUF’s own frames and data, and avoid touching `_G` except where the original SUF core already relies on it.
+
 - **LibStub semantics**
   - `LibStub("Major", true)` must be treated as **get library (silent)**, not as `NewLibrary`.
   - Only call `LibStub:NewLibrary("Major", minor)` with a numeric `minor`.
@@ -110,7 +118,7 @@ Always test changes locally before pushing to repo.
   - The `[afk]` tag in layout strings (e.g. `[(()afk() )][name]`) is resolved by `modules/tags.lua` via `UnitIsAFK(unit)`. Tag text only refreshes when the frame’s `FullUpdate` runs. **units.lua** must register:
     - **Player:** `PLAYER_FLAGS_CHANGED` → FullUpdate.
     - **Party / Raid:** `UNIT_FLAGS` → FullUpdate.
-  - Otherwise the name line stays static and never shows/clears "AFK". In **movers.lua** the config env stubs `UnitIsAFK` to `false` for the layout preview; that does not affect in-game behaviour.
+  - Otherwise the name line stays static and never shows/clears "AFK".
 
 - **Layout source: defaultlayout.lua**
   - Layout is **not** loaded from saved variables. **ShadowedUnitFrames.lua** always calls `LoadDefaultLayout()` on init and on profile reset so the layout for all users/characters comes from **modules/defaultlayout.lua**. Any change to that file is the single source of truth after reload/update.

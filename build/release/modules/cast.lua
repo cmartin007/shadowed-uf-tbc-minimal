@@ -6,6 +6,9 @@ local Layout = ShadowUF.Layout
 local SML = LibStub:GetLibrary("LibSharedMedia-3.0")
 
 local CAST_BAR_BORDER_SIZE = 2
+local CAST_BAR_BG_ALPHA = 0.35
+-- Target cast bar when cast is uninterruptible (grey)
+local TARGET_UNINTERRUPTIBLE_R, TARGET_UNINTERRUPTIBLE_G, TARGET_UNINTERRUPTIBLE_B = 0.45, 0.45, 0.45
 
 -- Single shared frame to drive per-frame cast bar updates (ensures smooth animation like Blizzard cast bar)
 local castBarUpdater = nil
@@ -86,6 +89,10 @@ end
 
 local function ensureCastBarBorder(bar)
 	if bar.borderTop then return end
+	bar.castBarBg = bar:CreateTexture(nil, "BACKGROUND")
+	bar.castBarBg:SetColorTexture(0, 0, 0, CAST_BAR_BG_ALPHA)
+	bar.castBarBg:SetPoint("TOPLEFT", bar, "TOPLEFT", -CAST_BAR_BORDER_SIZE, CAST_BAR_BORDER_SIZE)
+	bar.castBarBg:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", CAST_BAR_BORDER_SIZE, -CAST_BAR_BORDER_SIZE)
 	bar.borderTop = bar:CreateTexture(nil, "OVERLAY")
 	bar.borderTop:SetPoint("TOPLEFT", bar, "TOPLEFT", -CAST_BAR_BORDER_SIZE, CAST_BAR_BORDER_SIZE)
 	bar.borderTop:SetPoint("TOPRIGHT", bar, "TOPRIGHT", CAST_BAR_BORDER_SIZE, CAST_BAR_BORDER_SIZE)
@@ -105,7 +112,7 @@ local function ensureCastBarBorder(bar)
 end
 
 local function setCastBarBorderColor(bar)
-	local r, g, b, a = 0.6, 0.5, 0, 1  -- dark yellow border
+	local r, g, b, a = 0.25, 0.25, 0.25, 1  -- dark grey border
 	bar.borderTop:SetColorTexture(r, g, b, a)
 	bar.borderBottom:SetColorTexture(r, g, b, a)
 	bar.borderLeft:SetColorTexture(r, g, b, a)
@@ -115,9 +122,17 @@ end
 local function ensureCastBarSpark(bar)
 	if bar.spark then return end
 	bar.spark = bar:CreateTexture(nil, "OVERLAY")
-	bar.spark:SetWidth(4)
-	bar.spark:SetColorTexture(1, 0.95, 0.7, 1)  -- bright yellow-white spark
+	bar.spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
 	bar.spark:SetBlendMode("ADD")
+	bar.spark:SetWidth(12)
+end
+
+local function ensureCastBarIcon(bar)
+	if bar.icon then return end
+	bar.icon = bar:CreateTexture(nil, "ARTWORK")
+	bar.icon:SetPoint("TOPRIGHT", bar, "TOPLEFT", -2, 0)
+	bar.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+	bar.icon:Hide()
 end
 
 function Cast:OnEnable(frame)
@@ -132,10 +147,11 @@ function Cast:OnEnable(frame)
 	ensureCastBarBorder(frame.castBar)
 	setCastBarBorderColor(frame.castBar)
 	ensureCastBarSpark(frame.castBar)
+	ensureCastBarIcon(frame.castBar)
 
 	-- Optional name and time font strings (anchored to cast bar per config)
-	frame.castBar.nameStr = frame.castBar.nameStr or frame.castBar:CreateFontString(nil, "ARTWORK")
-	frame.castBar.timeStr = frame.castBar.timeStr or frame.castBar:CreateFontString(nil, "ARTWORK")
+	frame.castBar.nameStr = frame.castBar.nameStr or frame.castBar:CreateFontString(nil, "OVERLAY")
+	frame.castBar.timeStr = frame.castBar.timeStr or frame.castBar:CreateFontString(nil, "OVERLAY")
 
 	local nameCfg = config.name
 	local timeCfg = config.time
@@ -169,19 +185,16 @@ function Cast:OnEnable(frame)
 	frame:RegisterNormalEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", self, "Update")
 
 	frame:RegisterUpdateFunc(self, "Update")
-	-- Player cast bar: detach from frame and position 80px below the player frame
-	if unitType == "player" then
+	-- Detached cast bar for player/target: position from config or defaults (so bar is always visible)
+	if unitType == "player" or unitType == "target" then
 		local bar = frame.castBar
+		local a = (config and config.detachedAnchor) or {}
 		bar:SetParent(frame:GetParent())
 		bar:ClearAllPoints()
-		bar:SetPoint("TOP", frame, "BOTTOM", 0, -80)
-		bar.detachedPlayer = true
-	elseif unitType == "target" then
-		local bar = frame.castBar
-		bar:SetParent(frame:GetParent())
-		bar:ClearAllPoints()
-		bar:SetPoint("TOP", frame, "BOTTOM", 0, -80)
-		bar.detachedTarget = true
+		local x = (a.x ~= nil) and a.x or (unitType == "player" and 100 or -100)
+		local y = (a.y ~= nil) and a.y or (unitType == "player" and -80 or 80)
+		bar:SetPoint(a.point or "TOP", frame, a.relativePoint or "BOTTOM", x, y)
+		if unitType == "player" then bar.detachedPlayer = true else bar.detachedTarget = true end
 	end
 	self:Update(frame)
 end
@@ -216,15 +229,28 @@ function Cast:Update(frame, event, unit)
 		bar.castEndTime = endTime / 1000
 		bar.isChannel = nil
 		if bar.detachedPlayer or bar.detachedTarget then
-			bar:SetWidth(frame:GetWidth())
-			bar:SetHeight(14)
+			local cfg = ShadowUF.db.profile.units[frame.unitType] and ShadowUF.db.profile.units[frame.unitType].castBar
+			local w = (cfg and cfg.detachedWidth) or frame:GetWidth()
+			local h = (cfg and cfg.detachedHeight) or 14
+			bar:SetWidth(w)
+			bar:SetHeight(h)
+			if bar.icon then
+				bar.icon:SetSize(h, h)
+				bar.icon:SetTexture(texture or "")
+				bar.icon:Show()
+			end
 		end
 		applyCastBarTexture(bar, frame)
 		bar:SetMinMaxValues(0, duration)
 		bar:SetValue(GetTime() - bar.castStartTime)
-		local cc = (notInterruptible and ShadowUF.db.profile.castColors.uninterruptible) or ShadowUF.db.profile.castColors.cast
-		if cc then
-			bar:SetStatusBarColor(cc.r, cc.g, cc.b)
+		local cc
+		if frame.unitType == "target" and notInterruptible then
+			bar:SetStatusBarColor(TARGET_UNINTERRUPTIBLE_R, TARGET_UNINTERRUPTIBLE_G, TARGET_UNINTERRUPTIBLE_B)
+		else
+			cc = (notInterruptible and ShadowUF.db.profile.castColors.uninterruptible) or ShadowUF.db.profile.castColors.cast
+			if cc then
+				bar:SetStatusBarColor(cc.r, cc.g, cc.b)
+			end
 		end
 		if bar.nameStr and bar.nameStr:IsShown() then
 			bar.nameStr:SetText(name)
@@ -243,8 +269,16 @@ function Cast:Update(frame, event, unit)
 		bar.castEndTime = endTime / 1000
 		bar.isChannel = true
 		if bar.detachedPlayer or bar.detachedTarget then
-			bar:SetWidth(frame:GetWidth())
-			bar:SetHeight(14)
+			local cfg = ShadowUF.db.profile.units[frame.unitType] and ShadowUF.db.profile.units[frame.unitType].castBar
+			local w = (cfg and cfg.detachedWidth) or frame:GetWidth()
+			local h = (cfg and cfg.detachedHeight) or 14
+			bar:SetWidth(w)
+			bar:SetHeight(h)
+			if bar.icon then
+				bar.icon:SetSize(h, h)
+				bar.icon:SetTexture(texture or "")
+				bar.icon:Show()
+			end
 		end
 		applyCastBarTexture(bar, frame)
 		bar:SetMinMaxValues(0, duration)
@@ -266,5 +300,6 @@ function Cast:Update(frame, event, unit)
 	bar:SetScript("OnUpdate", nil)
 	bar.castStartTime = nil
 	bar.castEndTime = nil
+	if bar.icon then bar.icon:Hide() bar.icon:SetTexture(nil) end
 	bar:Hide()
 end

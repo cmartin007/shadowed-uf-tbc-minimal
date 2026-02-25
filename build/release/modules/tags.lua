@@ -45,7 +45,20 @@ local function resolveTag(unit, tag)
     elseif t == "race" then
         return select(2, UnitRace(unit)) or ""
     elseif t == "afk" then
+        -- TBC: UnitIsAFK is only valid for player and partyN; for target/focus/raid it can return true incorrectly
+        if unit ~= "player" and not (unit and unit:match("^party%d+$")) then
+            return ""
+        end
         if UnitIsAFK and UnitIsAFK(unit) then return "AFK" end
+        return ""
+    elseif t == "combo" or t == "cp" then
+        -- Simple combo point counter for cat/rogue: always read from player -> target
+        if GetComboPoints then
+            local points = GetComboPoints("player", "target")
+            if points and points > 0 then
+                return tostring(points)
+            end
+        end
         return ""
     elseif t == "classification" then
         local c = UnitClassification(unit)
@@ -86,7 +99,24 @@ function Tags:Register(frame, fontString, config)
     fontString.UpdateTags = function(fontStr)
         local f = fontStr._suf_frame
         local unit = f and f.unit
-        fontStr:SetText(formatTagString(unit, fontStr._suf_tagString or ""))
+        local text = formatTagString(unit, fontStr._suf_tagString or "")
+        -- Set font before SetText to avoid taint (RULES: font must be set first)
+        if not fontStr:GetFont() then
+            local path = "Fonts\\FRIZQT__.ttf"
+            local size = 12
+            if ShadowUF and ShadowUF.Layout and ShadowUF.Layout.mediaPath then
+                path = ShadowUF.Layout.mediaPath.font or path
+            end
+            if ShadowUF and ShadowUF.db and ShadowUF.db.profile and ShadowUF.db.profile.font then
+                local sz = ShadowUF.db.profile.font.size
+                if sz and sz > 0 then size = sz end
+            end
+            fontStr:SetFont(path, size, ShadowUF and ShadowUF.db and ShadowUF.db.profile and ShadowUF.db.profile.font and ShadowUF.db.profile.font.extra or "")
+        end
+        local ok, err = pcall(fontStr.SetText, fontStr, text)
+        if not ok and err and not err:match("Font not set") then
+            geterrorhandler()(err)
+        end
     end
 end
 

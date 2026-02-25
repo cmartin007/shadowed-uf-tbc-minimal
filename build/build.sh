@@ -57,7 +57,6 @@ MODULES=(
     "helpers"
     "units"
     "layout"
-    "movers"
     "defaultlayout"
     "health"
     "power"
@@ -108,3 +107,10 @@ echo "=== Build Complete ==="
 echo "Files: $FILE_COUNT"
 echo "Size: $SIZE"
 echo "Location: $BUILD_DIR"
+echo ""
+if [ -x "$REPO_DIR/build/copy-to-wow.sh" ]; then
+    echo "=== Copying to WoW addon folder ==="
+    "$REPO_DIR/build/copy-to-wow.sh"
+else
+    echo "Skipping copy (run ./build/copy-to-wow.sh manually if needed)"
+fi

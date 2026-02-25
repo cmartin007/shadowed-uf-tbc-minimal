@@ -62,3 +62,13 @@
   - `config.hidden.cast = true` so the default layout hides the Blizzard player/pet cast bar.
 - **modules/cast.lua**
   - Removed use of `hidden.cast` for SUF cast bar visibility. SUF cast bars always show when casting; `hidden.cast` only controls Blizzard cast bar hiding in core.
+
+### 2026-02-25: Combo points visual + layout polish
+
+- **modules/basecombopoints.lua**
+  - Reworked combo points into a dedicated `comboPoints` module that lives only on the player frame and uses `GetComboPoints("player", "target")` for rogues and druids.
+  - Simplified visuals: detached row of small **round red dots** (no Blizzard combo-frame art or shine stacks) created via a single texture per point.
+  - Update logic hides all dots at 0 points and shows dots from left to right as combo points are generated.
+- **modules/defaultlayout.lua**
+  - Player `comboPoints` configured as a detached widget anchored to `$healthBar` and positioned just above the player health bar, growing horizontally.
+  - Combo points are hard-enabled for the player in the default layout; no options or profile toggles.

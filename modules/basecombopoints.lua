@@ -1,6 +1,12 @@
 local Combo = {isComboPoints = true}
 ShadowUF.ComboPoints = Combo
 
+-- Register as a module that owns the `comboPoints` widget on the player frame
+ShadowUF:RegisterModule(Combo, "comboPoints", ShadowUF.L["Combo points"], false)
+
+-- Simple config describing how many points and which power we read.
+-- We initialize this per-frame in OnEnable.
+
 local function createIcons(config, pointsFrame)
 	local point, relativePoint, x, y
 	local pointsConfig = pointsFrame.cpConfig
@@ -22,11 +28,18 @@ local function createIcons(config, pointsFrame)
 	x = x or 0
 	y = y or 0
 
+	-- Use a built‑in round indicator texture with alpha so it appears circular
+	local size = config.size or 10
+	local tex = "Interface\\COMMON\\Indicator-Red"
+
 	for id=1, pointsConfig.max do
 		pointsFrame.icons[id] = pointsFrame.icons[id] or pointsFrame:CreateTexture(nil, "OVERLAY")
 		local texture = pointsFrame.icons[id]
-		texture:SetTexture(pointsConfig.icon)
-		texture:SetSize(config.size or 16, config.size or 16)
+
+		-- Simple minimal indicator: small round red dot
+		texture:SetTexture(tex)
+		texture:SetVertexColor(1, 1, 1, 1)
+		texture:SetSize(size, size)
 
 		if( id > 1 ) then
 			texture:ClearAllPoints()
@@ -90,6 +103,50 @@ local function createBlocks(config, pointsFrame)
 	end
 end
 
+-- Which widget key this module uses on the frame
+function Combo:GetComboPointType()
+	return "comboPoints"
+end
+
+-- Return current combo points for player on their target (rogue / cat form)
+function Combo:GetPoints(unit)
+	if unit ~= "player" then return 0 end
+	if not GetComboPoints then return 0 end
+	local points = GetComboPoints("player", "target")
+	return points or 0
+end
+
+function Combo:OnEnable(frame)
+	-- Only attach to the player frame, and only for rogue/druid
+	if frame.unitType ~= "player" or frame.unit ~= "player" then return end
+	local class = select(2, UnitClass("player"))
+	if class ~= "ROGUE" and class ~= "DRUID" then return end
+
+	local key = self:GetComboPointType()
+	local pointsFrame = frame[key]
+	if not pointsFrame then
+		pointsFrame = CreateFrame("Frame", nil, frame.highFrame or frame)
+		frame[key] = pointsFrame
+	end
+
+	pointsFrame.cpConfig = pointsFrame.cpConfig or {}
+	local cfg = pointsFrame.cpConfig
+	cfg.max = cfg.max or 5
+	cfg.grouping = cfg.grouping or 1
+	cfg.colorKey = cfg.colorKey or "COMBOPOINTS"
+	cfg.powerType = cfg.powerType or 4 -- COMBO_POINTS in modern API; in TBC GetComboPoints uses player/target and this is only for max
+
+	pointsFrame.blocks = pointsFrame.blocks or {}
+	pointsFrame.icons = pointsFrame.icons or {}
+
+	-- Events: target change and power changes (we recompute combo points each time)
+	frame:RegisterNormalEvent("PLAYER_TARGET_CHANGED", self, "Update")
+	frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", self, "Update")
+
+	-- Also keep in full-update list so new frames initialize correctly
+	frame:RegisterUpdateFunc(self, "Update")
+end
+
 function Combo:OnLayoutApplied(frame, config)
 	local key = self:GetComboPointType()
 	local pointsFrame = frame[key]
@@ -107,9 +164,9 @@ function Combo:OnLayoutApplied(frame, config)
 
 	if( not frame.visibility[key] ) then return end
 
-	-- Hide the active combo points
-	if( pointsFrame.points ) then
-		for _, texture in pairs(pointsFrame.points) do
+	-- Hide any existing combo point textures before rebuilding
+	if pointsFrame.icons then
+		for _, texture in pairs(pointsFrame.icons) do
 			texture:Hide()
 			texture:ClearAllPoints()
 		end
@@ -120,7 +177,7 @@ function Combo:OnLayoutApplied(frame, config)
 		pointsFrame.blocks = pointsFrame.blocks or {}
 		pointsFrame.points = pointsFrame.blocks
 
-		createBlocks(config, pointsFrame, pointsConfig.max)
+		createBlocks(config, pointsFrame)
 
 	-- guess not, will have to do icons :(
 	else
@@ -138,6 +195,10 @@ end
 
 function Combo:OnDisable(frame)
 	frame:UnregisterAll(self)
+	local key = self:GetComboPointType()
+	if frame[key] then
+		frame[key]:Hide()
+	end
 end
 
 function Combo:UpdateBarBlocks(frame, event, unit, powerType)
@@ -174,12 +235,13 @@ end
 
 function Combo:Update(frame, event, unit, powerType)
 	local key = self:GetComboPointType()
-	-- Anything power based will have an eventType to filter on
+	if not frame[key] or not frame[key].points then return end
+	-- Filter by power type if this bar is power-based (we don't set eventType so we always update)
 	if( event and frame[key].cpConfig.eventType and frame[key].cpConfig.eventType ~= powerType ) then return end
 
-	local points = self:GetPoints(unit)
+	local points = self:GetPoints(frame.unit or "player")
 
-	-- Bar display, hide it if we don't have any combo points
+	-- Bar display: show bar when we have points or showAlways is set
 	if( ShadowUF.db.profile.units[frame.unitType][key].isBar ) then
 		ShadowUF.Layout:SetBarVisibility(frame, key, ShadowUF.db.profile.units[frame.unitType][key].showAlways or (points and points > 0))
 	end

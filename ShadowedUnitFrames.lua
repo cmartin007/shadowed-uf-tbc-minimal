@@ -29,7 +29,7 @@ for i=1, 4 do ShadowUF.battlegroundUnits[i] = "arena" .. i end
 function ShadowUF:OnInitialize()
 	self.defaults = {
 		profile = {
-			locked = false,
+			locked = true,
 			advanced = false,
 			tooltipCombat = false,
 			bossmodSpellRename = true,
@@ -50,8 +50,12 @@ function ShadowUF:OnInitialize()
 
 	self:LoadUnitDefaults()
 
-	-- Initialize DB
+	-- Initialize DB (use real AceDB-3.0, but always start from TBC-minimal defaults)
 	self.db = LibStub:GetLibrary("AceDB-3.0"):New("ShadowedUFDB", self.defaults, true)
+	-- Ignore any pre-existing ShadowedUFDB saved variables from full SUF; always reset to defaults
+	if self.db and self.db.ResetDB then
+		self.db:ResetDB("Default")
+	end
 	self.db.RegisterCallback(self, "OnProfileChanged", "ProfilesChanged")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ProfilesChanged")
 	self.db.RegisterCallback(self, "OnProfileReset", "ProfileReset")
@@ -86,7 +90,6 @@ function ShadowUF:OnInitialize()
 	self:HideBlizzardFrames()
 	self.Layout:LoadSML()
 	self:LoadUnits()
-	self.modules.movers:Update()
 
 	local LibDualSpec = LibStub("LibDualSpec-1.0", true)
 	if LibDualSpec then LibDualSpec:EnhanceDatabase(self.db, "ShadowedUnitFrames") end
@@ -300,7 +303,7 @@ function ShadowUF:LoadUnitDefaults()
 			powerBar = {enabled = true},
 			emptyBar = {enabled = false},
 			portrait = {enabled = false},
-			castBar = {enabled = false, name = {}, time = {}},
+			castBar = {enabled = false, name = {}, time = {}, detachedWidth = 0, detachedHeight = 0, detachedAnchor = { point = "TOP", relativePoint = "BOTTOM", x = 0, y = 0 }},
 			text = {
 				{enabled = true, name = L["Left text"], text = "[name]", anchorPoint = "CLI", anchorTo = "$healthBar", width = 0.50, size = 0, x = 3, y = 0, default = true},
 				{enabled = true, name = L["Right text"], text = "[curmaxhp]", anchorPoint = "CRI", anchorTo = "$healthBar", width = 0.60, size = 0, x = -3, y = 0, default = true},
@@ -662,7 +665,6 @@ function ShadowUF:ProfilesChanged()
 	self:HideBlizzardFrames()
 	self.Layout:CheckMedia()
 	self.Units:ProfileChanged()
-	self.modules.movers:Update()
 end
 
 ShadowUF.noop = function() end
@@ -900,18 +902,6 @@ end
 
 function ShadowUF:Print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99Shadow UF|r: " .. msg)
-end
-
-CONFIGMODE_CALLBACKS = CONFIGMODE_CALLBACKS or {}
-CONFIGMODE_CALLBACKS["Shadowed Unit Frames"] = function(mode)
-	if( mode == "ON" ) then
-		ShadowUF.db.profile.locked = false
-		ShadowUF.modules.movers.isConfigModeSpec = true
-	elseif( mode == "OFF" ) then
-		ShadowUF.db.profile.locked = true
-	end
-
-	ShadowUF.modules.movers:Update()
 end
 
 SLASH_SHADOWEDUF1 = "/suf"
