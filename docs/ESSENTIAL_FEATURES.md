@@ -44,6 +44,9 @@ Do **not** remove these modules or their registration. Disabling a feature (e.g.
 | **pet** | Pet frame; health, power (if enabled in layout). |
 | **target** | Target frame; health, power, cast bar, auras, tags. |
 
+- **Level-diff color:** `[level]` tag in `modules/tags.lua` colors the level number by quest-style difficulty (grey/green/yellow/red by level differential using TBC grey formula). Do not remove or regress this when changing tags or defaultlayout text like `[level( )][perpp]`.
+- **Live health/power text:** Tags `[curhp]`, `[curmaxhp]`, `[curpp]`, `[curmaxpp]`, `[perhp]`, `[perpp]` in `modules/tags.lua` must update immediately when health or power change, driven by unit events (`UNIT_HEALTH`, `UNIT_MAXHEALTH`, `UNIT_CONNECTION`, `UNIT_POWER_FREQUENT`, `UNIT_MAXPOWER`, `UNIT_DISPLAYPOWER`) wired to `fontString:UpdateTags`. Do not change these tags or their events in a way that reintroduces “only updates on /reload” behavior.
+
 The codebase may still reference other unit types (e.g. targettarget, party, raid) for init or layout merge. **Do not** remove support for player, pet, or target; do not break the path that creates and updates these three frames.
 
 ---

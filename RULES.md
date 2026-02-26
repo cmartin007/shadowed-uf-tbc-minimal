@@ -45,6 +45,8 @@ Each phase (phase1/phase2/phase3) must have:
 - `review/decision.md` - Approval
 - `CHANGES.md` - Change log
 
+**Ralph Phase 1 (input & backlog):** For agent or automated workflows, a structured backlog lives in **`docs/ralph/`**: `backlog.json` lists features with `passes`, scope, and dependencies; `docs/ralph/README.md` and `slicing-guide.md` describe how to pick and slice the next task. Keep `backlog.json` in sync when a phase or feature is completed (see docs/ralph/README.md). For a **short high-level process** (all steps), see **`PROCESS.md`** at repo root.
+
 ## 4. Commit Message Format
 
 Use clear, descriptive commit messages:
@@ -65,6 +67,7 @@ Always test changes locally before pushing to repo.
 ## 7. Keep API Reference Updated
 
 - Use [Battle.net WoW Classic Game Data APIs](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis) as the **source of truth** for API calls.
+- Use **Wowpedia** (https://wowpedia.fandom.com) as a **reference for game mechanics and formulas** (e.g. grey mob level, XP thresholds). See `docs/API_REFERENCE.md` for the full list of reference tools.
 - When you add or change API usage, document it in `docs/API_REFERENCE.md`.
 
 ## 8. TBC Anniversary Compatibility Rules

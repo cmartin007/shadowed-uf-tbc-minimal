@@ -69,9 +69,17 @@
 ## Next Action
 Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras. Run `phase2/test/checklist.md` then complete `phase2/review/decision.md`.
 
+**Ralph Phase 1 (input & backlog):** For structured feature status and “what’s next,” see **`docs/ralph/README.md`** and **`docs/ralph/backlog.json`**. Slice work using **`docs/ralph/slicing-guide.md`** (one task = one checkbox or one file/one concern). For a **short process overview** (all steps in one place), see **`PROCESS.md`** at repo root.
+
 ---
 
 ## Changelog
+
+### 2026-02-26 (Ralph Phase 1 – input & requirement gathering)
+- **docs/ralph/:** Added Ralph Phase 1 setup for structured input and backlog: **README.md** (how we use Phase 1, workflow), **backlog.json** (feature list with passes, scope, dependencies), **slicing-guide.md** (how to slice into agent-sized tasks).
+- **PROGRESS.md:** Linked to docs/ralph for “what’s next” and slicing.
+- **PROCESS.md:** New root-level doc with a simple high-level process (5 steps + quick links) so the full loop is visible in one place.
+- **ralph/:** Scaffold folder structure for all three infographic phases: **phase1-input/** (gathering, backlog, slicing), **phase2-execution/** (task-selection, context-reset, ralph.sh stub), **phase3-feedback/** (guardrails, commits, memory/progress.txt). Each subfolder has a README; **ralph/README.md** maps phases to folders and includes folder tree.
 
 ### 2026-02-25 (phase2 docs and features)
 - **phase2/CHANGES.md:** Documented cast bar (detached player/target 80px, per-frame updater, spark, 2px dark yellow border, no background); SUF cast bar no longer gated by `hidden.cast`; Blizzard cast bar hide option (`hidden.cast = true` default, `_G` frame refs); auras tooltips (`SetUnitAura`) and `anchorTo = "$healthBar"` for target alignment.

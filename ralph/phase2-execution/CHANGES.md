@@ -1,0 +1,10 @@
+# Phase 2 execution log
+
+Brief log of completed tasks from the Ralph execution loop.
+
+---
+
+## 2026-02-26
+
+- **cleanup-plan** – Created **docs/cleanup-plan.md**: single cleanup plan listing areas (lint, retail paths, dead/optional code, duplication, comments), grouped by module, with impact/priority and suggested implementation order. References docs/plan-luacheck-warnings.md and docs/CULL_INVESTIGATION.md. No code changes. Backlog `cleanup-plan` set to passes true.
+- **tags-live-health-power** – Updated **modules/tags.lua** so tags `[curhp]`, `[curmaxhp]`, `[curpp]`, `[curmaxpp]`, `[perhp]`, `[perpp]` update live using TBC-safe unit events (`UNIT_HEALTH`, `UNIT_MAXHEALTH`, `UNIT_CONNECTION`, `UNIT_POWER_FREQUENT`, `UNIT_MAXPOWER`, `UNIT_DISPLAYPOWER`) wired to `fontString:UpdateTags`. Fixes player/party text showing only max values until `/reload` and keeps work per event minimal (single UnitHealth/UnitPower read + SetText).

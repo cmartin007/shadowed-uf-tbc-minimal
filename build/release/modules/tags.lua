@@ -12,6 +12,22 @@ local Tags = {
 function Tags:FastRegister(frame, fontString) end
 function Tags:FastUnregister(frame, fontString) end
 
+-- Quest-style level-diff color (TBC): return WoW hex RRGGBB or nil for default. Grey = trivial (no XP), green = low, yellow = same, red = higher.
+-- Grey threshold from Wowpedia: levels 1-5 grey=0; 6-39 grey=pl - floor(pl/10) - 5; 40-59 grey=pl - floor(pl/5) - 1; 60-70 grey=pl - 9.
+local function getGreyLevel(playerLevel)
+    if not playerLevel or playerLevel < 6 then return 0 end
+    if playerLevel >= 60 then return playerLevel - 9 end
+    if playerLevel >= 40 then return playerLevel - math.floor(playerLevel / 5) - 1 end
+    return playerLevel - math.floor(playerLevel / 10) - 5
+end
+local function getLevelDiffColorHex(unitLevel, playerLevel)
+    if not unitLevel or unitLevel < 1 or not playerLevel then return nil end
+    local greyLevel = getGreyLevel(playerLevel)
+    if unitLevel <= greyLevel then return "808080" end -- grey (no XP)
+    if unitLevel < playerLevel then return "19ff19" end -- green (slightly lower)
+    if unitLevel <= playerLevel + 2 then return "ffd100" end -- yellow (same-ish)
+    return "ff1919" end -- red (much higher)
+
 -- Resolve a single tag for unit (TBC API only). Returns string.
 local function resolveTag(unit, tag)
     if not unit or not UnitExists(unit) then return "" end
@@ -39,7 +55,12 @@ local function resolveTag(unit, tag)
         return "0%"
     elseif t == "level" then
         local l = UnitLevel(unit)
-        return (l and l > 0) and tostring(l) or "?"
+        local raw = (l and l > 0) and tostring(l) or "?"
+        if unit == "player" then return raw end
+        local playerLevel = UnitLevel("player")
+        local hex = getLevelDiffColorHex(l and l > 0 and l or nil, playerLevel)
+        if hex then return ("|cff%s%s|r"):format(hex, raw) end
+        return raw
     elseif t == "class" then
         return select(2, UnitClass(unit)) or ""
     elseif t == "race" then
@@ -63,9 +84,25 @@ local function resolveTag(unit, tag)
     elseif t == "classification" then
         local c = UnitClassification(unit)
         if not c or c == "normal" then return "" end
-        if c == "rareelite" then return "Rare Elite" end
-        if c == "worldboss" then return "Boss" end
-        return (c:sub(1, 1):upper() .. c:sub(2))
+
+        local symbol
+        if c == "rare" then
+            symbol = "R"
+        elseif c == "elite" then
+            symbol = "+"
+        elseif c == "rareelite" then
+            symbol = "R+"
+        elseif c == "worldboss" then
+            symbol = "Boss"
+        else
+            symbol = ""
+        end
+
+        if symbol ~= "" then
+            -- Always show classification in red
+            return ("|cffff1919%s|r"):format(symbol)
+        end
+        return ""
     end
     return "[" .. tag .. "]"
 end
@@ -96,6 +133,7 @@ function Tags:Register(frame, fontString, config)
     local tagString = (type(config) == "string") and config or (config and config.text) or ""
     fontString._suf_frame = frame
     fontString._suf_tagString = tagString
+
     fontString.UpdateTags = function(fontStr)
         local f = fontStr._suf_frame
         local unit = f and f.unit
@@ -118,8 +156,44 @@ function Tags:Register(frame, fontString, config)
             geterrorhandler()(err)
         end
     end
+
+    -- Event-driven updates for health/power tags so text changes when values do.
+    -- We keep a FullUpdate hook via RegisterUpdateFunc, but also listen to specific
+    -- UNIT_* events for cheaper and more responsive updates.
+    if frame and frame.RegisterUnitEvent and tagString and tagString ~= "" then
+        local lower = tagString:lower()
+        local needsHealth = lower:find("curhp", 1, true)
+            or lower:find("curmaxhp", 1, true)
+            or lower:find("perhp", 1, true)
+            or lower:find("perchp", 1, true)
+        local needsPower = lower:find("curpp", 1, true)
+            or lower:find("curmaxpp", 1, true)
+            or lower:find("perpp", 1, true)
+            or lower:find("percpp", 1, true)
+
+        if needsHealth then
+            frame:RegisterUnitEvent("UNIT_HEALTH", fontString, "UpdateTags")
+            frame:RegisterUnitEvent("UNIT_MAXHEALTH", fontString, "UpdateTags")
+            frame:RegisterUnitEvent("UNIT_CONNECTION", fontString, "UpdateTags")
+        end
+
+        if needsPower then
+            -- TBC-safe power events: use generic power events only
+            frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", fontString, "UpdateTags")
+            frame:RegisterUnitEvent("UNIT_MAXPOWER", fontString, "UpdateTags")
+            frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", fontString, "UpdateTags")
+        end
+    end
 end
 
-function Tags:Unregister(fontString) end
+function Tags:Unregister(fontString)
+    if not fontString then return end
+    local frame = fontString._suf_frame
+    if frame and frame.UnregisterAll then
+        frame:UnregisterAll(fontString)
+    end
+    fontString._suf_frame = nil
+    fontString._suf_tagString = nil
+end
 
 ShadowUF.Tags = Tags

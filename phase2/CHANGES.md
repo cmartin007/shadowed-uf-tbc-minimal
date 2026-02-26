@@ -1,5 +1,16 @@
 # Phase 2 Changes Log
 
+## 2026-02-26: Level number color by level differential
+- **modules/tags.lua:** Level tag `[level]` now colors the level number by differential to player level (quest-style): grey (trivial, 10+ below), green (slightly lower), yellow (same-ish, ±2), red (much higher). Uses `UnitLevel(unit)` and `UnitLevel("player")` only; helper `getLevelDiffColorHex(unitLevel, playerLevel)` returns WoW hex; player’s own level left uncolored. Level configured in defaultlayout.lua (e.g. target `[level( )][perpp]` line 872).
+- **2026-02-26:** `[classification]` tag now uses short symbols: `R` for rare, `+` for elite, `R+` for rare elite (worldboss stays `Boss`). Defaultlayout text like `[classification( )][perpp]` will show these flags before percent.
+
+
+- **Grey threshold fix:** Grey now uses Wowpedia formula (levels 6–39: grey = pl − floor(pl/10) − 5; 40–59 and 60–70 formulas) so e.g. level 8–9 show grey at player 15.
+- **Docs:** Wowpedia added as reference: `docs/API_REFERENCE.md` (Reference tools), RULES.md §7, `docs/DEVELOPMENT.md` Links.
+
+## Ralph Phase 1 (Input & Requirement Gathering) – 2026-02-26
+- **docs/ralph/:** New folder for Ralph Phase 1 (from docs/agent-looping-flow.png): structured backlog and slicing for the project. See docs/ralph/README.md. Backlog reflects Phase 2 status (cast/auras/health dispel done; integration-retail-api, test-checklist, docs, review still open).
+
 ## Planning (2026-02-24)
 - Created Phase 2 plan: **Cast Bar + Auras**.
 - **phase2/plan/tasks.md:** Tasks for cast bar module (TBC UnitCastingInfo/UnitChannelInfo), health dispel color fix (UnitDebuff), minimal auras module (UpdateFilter + optional icon display).

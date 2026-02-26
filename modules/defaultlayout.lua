@@ -401,7 +401,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			text = {
 				{text = "[(()afk() )][name]"},
 				{text = "[curmaxhp]"},
-				{text = "[perpp]"},
+				{text = "[level( )][perpp]"},
 				{text = "[curmaxpp]"},
 				{text = "[(()afk() )][name]"},
 				{text = ""},
@@ -869,7 +869,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			text = {
 				{text = "[(()afk() )][name]"},
 				{text = "[curmaxhp]"},
-				{text = "[level( )][perpp]", width = 0.50},
+				{text = "[level()][classification( )][perpp]", width = 0.50},
 				{text = "[curmaxpp]"},
 				{text = ""},
 			},

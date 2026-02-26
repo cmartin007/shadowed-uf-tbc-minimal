@@ -84,6 +84,15 @@ Spellcast event names and whether they support **unit** registration (`RegisterU
 
 ## Community & official resources
 
+### Reference tools for this project
+
+- **Wowpedia** – Game mechanics, formulas, and behaviour (e.g. grey mob level, XP thresholds, quest difficulty). Use when implementing features that depend on WoW rules rather than Lua API alone.  
+  - **URL:** https://wowpedia.fandom.com (e.g. [Mob experience](https://wowpedia.fandom.com/wiki/Mob_experience), [Experience point](https://wowpedia.fandom.com/wiki/Experience_point)).
+
+- **Battle.net** – Game data REST APIs and official Blizzard docs (see below).
+
+- **warcraft.wiki.gg** – In-game Lua API and Classic coverage (see below).
+
 ### Source of truth – Battle.net (game data / REST)
 - **WoW Classic Game Data APIs:** [community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis)  
   Use this as the source of truth for any game data API calls (items, realms, etc.).

@@ -96,22 +96,44 @@ function ShadowUF:OnInitialize()
 end
 
 function ShadowUF.UnitAuraBySpell(unit, spell, filter)
-	local auraData
-	if type(spell) == "string" then
-		auraData = C_UnitAuras.GetAuraDataBySpellName(unit, spell, filter)
-	elseif type(spell) == "number" then
-		local index = 0
-		while true do
-			index = index + 1
-			local data = C_UnitAuras.GetAuraDataByIndex(unit, index, filter)
-			if not data then break end
-			if data.spellId == spell then
-				auraData = data
-				break
+	-- Retail path: use C_UnitAuras + AuraUtil when available
+	if C_UnitAuras and AuraUtil and AuraUtil.UnpackAuraData then
+		local auraData
+		if type(spell) == "string" then
+			auraData = C_UnitAuras.GetAuraDataBySpellName(unit, spell, filter)
+		elseif type(spell) == "number" then
+			local index = 0
+			while true do
+				index = index + 1
+				local data = C_UnitAuras.GetAuraDataByIndex(unit, index, filter)
+				if not data then break end
+				if data.spellId == spell then
+					auraData = data
+					break
+				end
 			end
 		end
+		return AuraUtil.UnpackAuraData(auraData)
 	end
-	return AuraUtil.UnpackAuraData(auraData)
+
+	-- TBC path: C_UnitAuras/AuraUtil absent; use UnitAura loop (Burning Crusade has up to 40 auras)
+	local f = (filter == "HARMFUL" or filter == "HELPFUL") and filter or "HELPFUL"
+	for i = 1, 40 do
+		local name, icon, count, dispelType, duration, expirationTime, source, _, _, spellId = UnitAura(unit, i, f)
+		if not name then break end
+		local match
+		if type(spell) == "string" then
+			match = (name == spell)
+		elseif type(spell) == "number" and spellId then
+			match = (spellId == spell)
+		else
+			match = false
+		end
+		if match then
+			return UnitAura(unit, i, f)
+		end
+	end
+	return nil
 end
 
 function ShadowUF:CheckBuild()

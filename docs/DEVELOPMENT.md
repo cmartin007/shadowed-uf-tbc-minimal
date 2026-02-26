@@ -78,6 +78,7 @@ SUFconfig = {
 
 ## Links
 - **Source of truth for API calls:** [Battle.net – WoW Classic Game Data APIs](https://community.developer.battle.net/documentation/world-of-warcraft-classic/game-data-apis)
+- **Game mechanics & formulas:** [Wowpedia](https://wowpedia.fandom.com) (e.g. grey mob level, XP) – see `docs/API_REFERENCE.md` for full reference list
 - In-game Lua API (addon reference): https://warcraft.wiki.gg/wiki/World_of_Warcraft_API/Classic
 - Battle.net WoW Classic docs: https://community.developer.battle.net/documentation/world-of-warcraft-classic
 

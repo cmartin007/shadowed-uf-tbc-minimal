@@ -1,0 +1,89 @@
+{
+  "$schema": "Ralph Phase 1 backlog: feature list with passes, scope, dependencies.",
+  "project": "SUF TBC Minimal",
+  "target": "WoW Classic Anniversary TBC only",
+  "updated": "2026-02-26",
+  "features": [
+    {
+      "id": "phase1-mvp",
+      "feature": "Phase 1 MVP: Player + Target + Pet frames",
+      "phase": "phase1",
+      "passes": true,
+      "scope": "Core frames, layout from defaultlayout.lua, health/power, no options/media.",
+      "dependencies": [],
+      "notes": "Proof: phase1/review/phase1-unit-frames-proof.png"
+    },
+    {
+      "id": "phase2-cast-bar",
+      "feature": "Cast bar module (player + target)",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "modules/cast.lua, UnitCastingInfo/UnitChannelInfo, detached bar, spark, Blizzard bar hide.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "TBC APIs only; hidden.cast only hides Blizzard bar."
+    },
+    {
+      "id": "phase2-health-dispel",
+      "feature": "Health bar dispel color (TBC)",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "modules/health.lua UpdateAura using UnitDebuff when C_UnitAuras absent.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "Cross-build safe."
+    },
+    {
+      "id": "phase2-auras",
+      "feature": "Auras module (buffs/debuffs icons)",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "modules/auras.lua, UnitBuff/UnitDebuff, anchors, borders, OmniCC, tooltips.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "ResolveAnchorPoints in defaultlayout; auras merged for skipped units."
+    },
+    {
+      "id": "level-diff-color",
+      "feature": "Level number color by level differential",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Color the level number on unit frames (e.g. target) by differential to player level: red (much higher), yellow (same-ish), green (slightly lower), grey (trivial/no XP). Like quest log level coloring. TBC: UnitLevel(unit), player level; apply color to the [level] tag or equivalent text.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "Quest-style: red/yellow/green/grey by level diff. Level param configured in modules/defaultlayout.lua (e.g. target: [level( )][perpp] line 872)."
+    },
+    {
+      "id": "classification-symbols",
+      "feature": "Unit classification short symbols (R/+)",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Adjust the `[classification]` tag in `modules/tags.lua` so it returns short flags instead of words: `R` for rare, `+` for elite, `R+` for rare elite, and (optionally) a symbol for worldboss. Ensure defaultlayout usages like `[classification( )][perpp]` show these symbols before percentage.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "Request based on target UI text: e.g. rare creature shows `R` before `perpp` in `[classification( )][perpp]`."
+    },
+    {
+      "id": "tags-live-health-power",
+      "feature": "Live health/power text via unit events",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Ensure tags like [curmaxhp], [curhp], [curmaxpp], and [perpp] update immediately when health or power change, without requiring a full frame reload. Implemented by wiring Tags:Register to register UNIT_HEALTH/UNIT_MAXHEALTH/UNIT_CONNECTION and UNIT_POWER_FREQUENT/UNIT_MAXPOWER/UNIT_DISPLAYPOWER to fontString:UpdateTags for any text that references those tags.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "Implemented in modules/tags.lua; minimal per-event work (UnitHealth/UnitPower reads + SetText). Documented as TBC-safe and within RULES performance expectations."
+    },
+    {
+      "id": "cleanup-plan",
+      "feature": "Codebase cleanup plan (WIP)",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Brainstorm and list cleanup areas (dead code, retail-only paths, duplication, comments), then group and rank by impact. No code changes yet.",
+      "dependencies": [],
+      "notes": "Done: docs/cleanup-plan.md. Design-only; refine into smaller slices before implementation."
+    },
+    {
+      "id": "cleanup-wip-container",
+      "feature": "Codebase cleanup implementation (WIP container)",
+      "phase": "phase2",
+      "passes": false,
+      "scope": "Placeholder for future cleanup work after plan is ready. Will be replaced by smaller, concrete items (e.g. remove unused module X, simplify units.lua Y).",
+      "dependencies": ["cleanup-plan"],
+      "notes": "Do not use directly; split into concrete features via grooming."
+    }
+  ]
+}

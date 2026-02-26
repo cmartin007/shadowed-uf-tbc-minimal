@@ -1,0 +1,7 @@
+# Ralph loop – persistent memory (progress.txt)
+# Append findings, logics, and patterns here so future runs can reuse them.
+# Format: date | section (Findings / Logics / Threeings) | note
+#
+# Example:
+# 2026-02-26 | Findings | Pattern: ResolveAnchorPoints in defaultlayout.lua converts BL→BOTTOMLEFT for SetPoint.
+# 2026-02-26 | Logics   | Quirk: C_UnitAuras / AuraUtil absent in TBC; use UnitBuff/UnitDebuff.
