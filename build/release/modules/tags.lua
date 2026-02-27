@@ -28,6 +28,18 @@ local function getLevelDiffColorHex(unitLevel, playerLevel)
     if unitLevel <= playerLevel + 2 then return "ffd100" end -- yellow (same-ish)
     return "ff1919" end -- red (much higher)
 
+-- Short formatter for large values (e.g. 12345 -> 12.3k) for display.
+local function formatShort(value)
+    value = value or 0
+    if value >= 1000000 then
+        return string.format("%.1fm", value / 1000000):gsub("%.0m", "m")
+    elseif value >= 10000 then -- 5+ digits -> use k
+        return string.format("%.1fk", value / 1000):gsub("%.0k", "k")
+    else
+        return tostring(value)
+    end
+end
+
 -- Resolve a single tag for unit (TBC API only). Returns string.
 local function resolveTag(unit, tag)
     if not unit or not UnitExists(unit) then return "" end
@@ -36,14 +48,40 @@ local function resolveTag(unit, tag)
     if t == "name" then
         return UnitName(unit) or ""
     elseif t == "curhp" then
-        return tostring(UnitHealth(unit) or 0)
+        return formatShort(UnitHealth(unit) or 0)
     elseif t == "curmaxhp" then
         local c, m = UnitHealth(unit), UnitHealthMax(unit)
-        return (tostring(c or 0) .. "/" .. tostring(m or 0))
+        return (formatShort(c or 0) .. "/" .. formatShort(m or 0))
     elseif t == "perhp" or t == "perchp" then
         local c, m = UnitHealth(unit), UnitHealthMax(unit)
         if m and m > 0 then return tostring(math.floor((c or 0) / m * 100)) .. "%" end
         return "0%"
+    elseif t == "perhpyellow" then
+        local c, m = UnitHealth(unit), UnitHealthMax(unit)
+        if m and m > 0 then
+            local pct = math.floor((c or 0) / m * 100)
+            return ("|cffffd100%d%%|r"):format(pct)
+        end
+        return "|cffffd1000%|r"
+    elseif t == "perhpclass" then
+        local c, m = UnitHealth(unit), UnitHealthMax(unit)
+        if not (m and m > 0) then return "0%" end
+        local pct = math.floor((c or 0) / m * 100)
+
+        local classToken = (unit == "pet") and "PET" or select(2, UnitClass(unit))
+        local r, g, b = 1, 1, 1
+        if ShadowUF and ShadowUF.db and ShadowUF.db.profile and ShadowUF.db.profile.classColors and classToken then
+            local col = ShadowUF.db.profile.classColors[classToken]
+            if col then r, g, b = col.r or r, col.g or g, col.b or b end
+        end
+
+        local function toHex(x)
+            x = math.max(0, math.min(1, x or 0))
+            return string.format("%02x", math.floor(x * 255 + 0.5))
+        end
+
+        local hex = toHex(r) .. toHex(g) .. toHex(b)
+        return ("|cff%s%d%%|r"):format(hex, pct)
     elseif t == "curpp" then
         return tostring(UnitPower(unit) or 0)
     elseif t == "curmaxpp" then
@@ -53,6 +91,58 @@ local function resolveTag(unit, tag)
         local c, m = UnitPower(unit), UnitPowerMax(unit)
         if m and m > 0 then return tostring(math.floor((c or 0) / m * 100)) .. "%" end
         return "0%"
+    elseif t == "perppclass" then
+        local c, m = UnitPower(unit), UnitPowerMax(unit)
+        if not (m and m > 0) then return "0%" end
+        local pct = math.floor((c or 0) / m * 100)
+
+        local classToken = (unit == "pet") and "PET" or select(2, UnitClass(unit))
+        local r, g, b = 1, 1, 1
+        if ShadowUF and ShadowUF.db and ShadowUF.db.profile and ShadowUF.db.profile.classColors and classToken then
+            local col = ShadowUF.db.profile.classColors[classToken]
+            if col then r, g, b = col.r or r, col.g or g, col.b or b end
+        end
+
+        local function toHex(x)
+            x = math.max(0, math.min(1, x or 0))
+            return string.format("%02x", math.floor(x * 255 + 0.5))
+        end
+
+        local hex = toHex(r) .. toHex(g) .. toHex(b)
+        return ("|cff%s%d%%|r"):format(hex, pct)
+    elseif t == "perpppowercolor" then
+        local c, m = UnitPower(unit), UnitPowerMax(unit)
+        if not (m and m > 0) then return "0%" end
+        local pct = math.floor((c or 0) / m * 100)
+
+        local powerID, powerType, altR, altG, altB = UnitPowerType(unit)
+        local token = Tags.powerMap[powerType] or Tags.powerMap[powerID] or powerType or "MANA"
+
+        local r, g, b
+        if ShadowUF and ShadowUF.db and ShadowUF.db.profile and ShadowUF.db.profile.powerColors then
+            local col = ShadowUF.db.profile.powerColors[token]
+            if col then r, g, b = col.r, col.g, col.b end
+        end
+        if not (r and g and b) then
+            if altR then
+                r, g, b = altR, altG, altB
+            else
+                local manaCol = ShadowUF and ShadowUF.db and ShadowUF.db.profile and ShadowUF.db.profile.powerColors and ShadowUF.db.profile.powerColors.MANA
+                if manaCol then
+                    r, g, b = manaCol.r, manaCol.g, manaCol.b
+                else
+                    r, g, b = 0.3, 0.5, 0.85
+                end
+            end
+        end
+
+        local function toHex(x)
+            x = math.max(0, math.min(1, x or 0))
+            return string.format("%02x", math.floor(x * 255 + 0.5))
+        end
+
+        local hex = toHex(r) .. toHex(g) .. toHex(b)
+        return ("|cff%s%d%%|r"):format(hex, pct)
     elseif t == "level" then
         local l = UnitLevel(unit)
         local raw = (l and l > 0) and tostring(l) or "?"

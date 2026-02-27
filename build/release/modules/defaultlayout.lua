@@ -231,7 +231,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 		targettargettarget = {anchorPoint = "RC", anchorTo = "#SUFUnittargettarget", x = 0, y = 0},
 		targettarget = {anchorPoint = "BL", anchorTo = "#SUFUnittarget", x = 0, y = 0},
 		focustarget = {anchorPoint = "TL", anchorTo = "#SUFUnitfocus", x = 0, y = 0},
-		party = {point = "TOPLEFT", anchorTo = "#SUFUnitplayer", relativePoint = "TOPLEFT", movedAnchor = "TL", x = 0, y = -60},
+		party = {point = "TOPLEFT", anchorTo = "#SUFUnitplayer", relativePoint = "TOPLEFT", movedAnchor = "TL", x = -600, y = 400},
 		focus = {anchorPoint = "RB", anchorTo = "#SUFUnittarget", x = 35, y = -4},
 		target = {anchorPoint = "RC", anchorTo = "#SUFUnitplayer", x = 50, y = 0},
 		player = {point = "CENTER", anchorTo = "UIParent", relativePoint = "CENTER", y = -175, x = -89},
@@ -400,11 +400,12 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 			},
 			text = {
 				{text = "[(()afk() )][name]"},
-				{text = "[curmaxhp]"},
-				{text = "[level( )][perpp]"},
-				{text = "[curmaxpp]"},
-				{text = "[(()afk() )][name]"},
-				{text = ""},
+				{text = "|CFF917EC0[perhp]|R", anchorTo = "$healthBar", anchorPoint = "C", width = 0.01, x = 0, y = 0},
+				{text = "[curmaxhp]", anchorTo = "$healthBar", anchorPoint = "CRI", width = 0.60, x = -3, y = 0},
+				-- Power bar text: center = [perpp], right = [curmaxpp]
+				{text = "[level()]", anchorTo = "$powerBar", anchorPoint = "CLI", width = 0.50, x = 3, y = 0},
+				{text = "[perpppowercolor]", anchorTo = "$powerBar", anchorPoint = "C", width = 0.01, x = 0, y = 0},
+				{text = "[curmaxpp]", anchorTo = "$powerBar", anchorPoint = "CRI", width = 0.60, x = -3, y = 0},
 				{enabled = true, width = 1, name = L["Timer Text"], text = "[totem:timer]", anchorTo = "$totemBar", anchorPoint = "C", x = 0, y = 0, size = 0, default = true, block = true},
 				{enabled = true, width = 1, name = L["Timer Text"], text = "[rune:timer]", anchorTo = "$runeBar", anchorPoint = "C", size = 0, x = 0, y = 0, default = true, block = true},
 				{enabled = true, width = 1, name = L["Text"], text = "[monk:abs:stagger]", anchorTo = "$staggerBar", anchorPoint = "C", size = 0, x = 0, y = 0, default = true}
@@ -430,8 +431,8 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				phase = {enabled = true, anchorPoint = "RC", size = 14, x = -11, y = 0, anchorTo = "$parent"}
 			},
 			auras = {
-				buffs = {enabled = true, maxRows = 1},
-				debuffs = {enabled = true, maxRows = 1},
+				buffs = {enabled = true, maxRows = 1, size = 6},
+				debuffs = {enabled = true, maxRows = 1, size = 6},
 			},
 			text = {
 				{text = "[(()afk() )][name]"},
@@ -867,11 +868,13 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 14, anchorPoint = "TL", anchorTo = "$healthBar", x = 0, y = 5},
 			},
 			text = {
-				{text = "[(()afk() )][name]"},
-				{text = "[curmaxhp]"},
-				{text = "[level()][classification( )][perpp]", width = 0.50},
-				{text = "[curmaxpp]"},
-				{text = ""},
+				{text = "[(()afk() )][name]", anchorTo = "$healthBar", width = 0.40},
+				{text = "[perhpclass]", anchorTo = "$healthBar", anchorPoint = "C", width = 0.01, x = 0, y = 0},
+				{text = "[curmaxhp]", anchorTo = "$healthBar", anchorPoint = "CRI", width = 0.60, x = -3, y = 0},
+				-- Power bar text: center = [perpppowercolor], right = [curmaxpp]
+				{text = "[level()][classification( )]", anchorTo = "$powerBar", anchorPoint = "CLI", width = 0.50, x = 3, y = 0},
+				{text = "[perpppowercolor]", anchorTo = "$powerBar", anchorPoint = "C", width = 0.01, x = 0, y = 0},
+				{text = "[curmaxpp]", anchorTo = "$powerBar", anchorPoint = "CRI", width = 0.60, x = -3, y = 0},
 			},
 		},
 		pet = {

@@ -68,6 +68,15 @@
       "notes": "Implemented in modules/tags.lua; minimal per-event work (UnitHealth/UnitPower reads + SetText). Documented as TBC-safe and within RULES performance expectations."
     },
     {
+      "id": "hp-pp-display-polish",
+      "feature": "Health/power text layout and color polish",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Polish health and power text on player/target: center [perhp] and [perpp] on their respective bars, abbreviate large health values (e.g. 12345 -> 12.3k) in [curhp]/[curmaxhp], and add colored percentage tags ([perhpclass], [perppclass], [perpppowercolor]) using class and power colors for readability.",
+      "dependencies": ["phase1-mvp", "tags-live-health-power"],
+      "notes": "Implemented in modules/tags.lua and modules/defaultlayout.lua; purely visual polish, not essential to minimal functionality."
+    },
+    {
       "id": "cleanup-plan",
       "feature": "Codebase cleanup plan (WIP)",
       "phase": "phase2",
