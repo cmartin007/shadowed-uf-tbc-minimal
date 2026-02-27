@@ -40,6 +40,17 @@ local function formatShort(value)
     end
 end
 
+-- Helper: get display power for tags, mirroring Power:UpdateColor (Druid player uses mana).
+local function getDisplayPower(unit)
+    local powerID, powerType, altR, altG, altB = UnitPowerType(unit)
+    if unit == "player" and select(2, UnitClass("player")) == "DRUID" then
+        powerID, powerType = 0, "MANA"
+    end
+    local current = UnitPower(unit, powerID)
+    local max = UnitPowerMax(unit, powerID)
+    return current, max, powerID, powerType, altR, altG, altB
+end
+
 -- Resolve a single tag for unit (TBC API only). Returns string.
 local function resolveTag(unit, tag)
     if not unit or not UnitExists(unit) then return "" end
@@ -83,16 +94,17 @@ local function resolveTag(unit, tag)
         local hex = toHex(r) .. toHex(g) .. toHex(b)
         return ("|cff%s%d%%|r"):format(hex, pct)
     elseif t == "curpp" then
-        return tostring(UnitPower(unit) or 0)
+        local c = getDisplayPower(unit)
+        return tostring(c or 0)
     elseif t == "curmaxpp" then
-        local c, m = UnitPower(unit), UnitPowerMax(unit)
+        local c, m = getDisplayPower(unit)
         return (tostring(c or 0) .. "/" .. tostring(m or 0))
     elseif t == "perpp" or t == "percpp" then
-        local c, m = UnitPower(unit), UnitPowerMax(unit)
+        local c, m = getDisplayPower(unit)
         if m and m > 0 then return tostring(math.floor((c or 0) / m * 100)) .. "%" end
         return "0%"
     elseif t == "perppclass" then
-        local c, m = UnitPower(unit), UnitPowerMax(unit)
+        local c, m = getDisplayPower(unit)
         if not (m and m > 0) then return "0%" end
         local pct = math.floor((c or 0) / m * 100)
 
@@ -111,11 +123,9 @@ local function resolveTag(unit, tag)
         local hex = toHex(r) .. toHex(g) .. toHex(b)
         return ("|cff%s%d%%|r"):format(hex, pct)
     elseif t == "perpppowercolor" then
-        local c, m = UnitPower(unit), UnitPowerMax(unit)
+        local c, m, powerID, powerType, altR, altG, altB = getDisplayPower(unit)
         if not (m and m > 0) then return "0%" end
         local pct = math.floor((c or 0) / m * 100)
-
-        local powerID, powerType, altR, altG, altB = UnitPowerType(unit)
         local token = Tags.powerMap[powerType] or Tags.powerMap[powerID] or powerType or "MANA"
 
         local r, g, b

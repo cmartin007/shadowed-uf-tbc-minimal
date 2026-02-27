@@ -265,8 +265,9 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 	config.parentUnit = {
 		portrait = {enabled = false, type = "3D", alignment = "LEFT", width = 0.22, height = 0.50, order = 15, fullBefore = 0, fullAfter = 100},
 		auras = {
-			buffs = {enabled = false, anchorPoint = "BL", size = 16, perRow = 10, x = 0, y = 0, show = {player = true, boss = true, raid = true, misc = true}, enlarge = {}, timers = {ALL = true}},
-			debuffs = {enabled = false, anchorPoint = "BL", size = 16, perRow = 10, x = 0, y = 0, show = {player = true, boss = true, raid = true, misc = true}, enlarge = {SELF = true}, timers = {ALL = true}},
+			-- Base sizes slightly reduced; self-cast debuffs can scale up on top via enlarge.SELF
+			buffs = {enabled = false, anchorPoint = "BL", size = 14, perRow = 10, x = 0, y = 0, show = {player = true, boss = true, raid = true, misc = true}, enlarge = {}, timers = {ALL = true}},
+			debuffs = {enabled = false, anchorPoint = "BL", size = 14, perRow = 10, x = 0, y = 0, show = {player = true, boss = true, raid = true, misc = true}, enlarge = {SELF = true}, timers = {ALL = true}},
 		},
 		text = {
 			{width = 0.50, name = L["Left text"], anchorTo = "$healthBar", anchorPoint = "CLI", x = 3, y = 0, size = 0, default = true},
@@ -395,12 +396,12 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				sumPending = {enabled = true, anchorPoint = "C", size = 40, x = 0, y = 0, anchorTo = "$parent"},
 			},
 			auras = {
-				buffs = {enabled = false, maxRows = 1, perRow = 8, size = 18, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
-				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 17, anchorPoint = "BR", anchorTo = "$parent", x = -192, y = 41},
+				buffs = {enabled = false, maxRows = 1, perRow = 8, size = 16, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
+				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 15, anchorPoint = "BR", anchorTo = "$parent", x = -192, y = 41},
 			},
 			text = {
-				{text = "[(()afk() )][name]"},
-				{text = "|CFF917EC0[perhp]|R", anchorTo = "$healthBar", anchorPoint = "C", width = 0.01, x = 0, y = 0},
+				{text = "[(()afk() )][name]", anchorTo = "$healthBar", width = 0.40},
+				{text = "[perhpclass]", anchorTo = "$healthBar", anchorPoint = "C", width = 0.01, x = 0, y = 0},
 				{text = "[curmaxhp]", anchorTo = "$healthBar", anchorPoint = "CRI", width = 0.60, x = -3, y = 0},
 				-- Power bar text: center = [perpp], right = [curmaxpp]
 				{text = "[level()]", anchorTo = "$powerBar", anchorPoint = "CLI", width = 0.50, x = 3, y = 0},
@@ -864,8 +865,8 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				petBattle = {enabled = true, anchorPoint = "BL", size = 18, x = -6, y = 14, anchorTo = "$parent"}
 			},
 			auras = {
-				buffs = {enabled = true, maxRows = 1, perRow = 10, size = 12, anchorPoint = "BL", anchorTo = "$healthBar", x = 0, y = -60},
-				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 14, anchorPoint = "TL", anchorTo = "$healthBar", x = 0, y = 5},
+				buffs = {enabled = true, maxRows = 1, perRow = 10, size = 10, anchorPoint = "BL", anchorTo = "$healthBar", x = 0, y = -60},
+				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 12, anchorPoint = "TL", anchorTo = "$healthBar", x = 0, y = 5},
 			},
 			text = {
 				{text = "[(()afk() )][name]", anchorTo = "$healthBar", width = 0.40},

@@ -61,12 +61,14 @@ local function getConfig(frame, kind)
 		size = (cfg.size or parentCfg.size or DEFAULT_SIZE) * SIZE_MULTIPLIER,
 		perRow = cfg.perRow or parentCfg.perRow or DEFAULT_PER_ROW,
 		maxRows = cfg.maxRows or parentCfg.maxRows or 1,
+		enlarge = cfg.enlarge or parentCfg.enlarge, -- e.g. { SELF = true }
 	}
 end
 
 local function createIconSlot(parent, size, index)
 	local slot = CreateFrame("Frame", nil, parent)
 	slot:SetSize(size, size)
+	slot:SetScale(1)
 	slot:EnableMouse(true)
 	slot.index = index
 	slot.icon = slot:CreateTexture(nil, "ARTWORK")
@@ -149,16 +151,17 @@ local function getAuraByIndex(unit, kind, index)
 		if not auraData then return nil end
 		local name, icon, count, _, duration, expirationTime = AuraUtil.UnpackAuraData(auraData)
 		local auraType = auraData.dispelName
-		return name, nil, icon, count, duration, expirationTime, auraType
+		local isPlayer = auraData.isFromPlayerOrPlayerPet or auraData.sourceUnit == "player"
+		return name, nil, icon, count, duration, expirationTime, auraType, isPlayer
 	end
 
 	if kind == "buffs" then
 		local name, rank, icon, count, _, duration, expirationTime = UnitBuff(unit, index)
-		return name, rank, icon, count, duration, expirationTime, nil
+		return name, rank, icon, count, duration, expirationTime, nil, nil
 	end
 
 	local name, rank, icon, count, auraType, duration, expirationTime = UnitDebuff(unit, index)
-	return name, rank, icon, count, duration, expirationTime, auraType
+	return name, rank, icon, count, duration, expirationTime, auraType, nil
 end
 
 local function updateAuraList(frame, kind)
@@ -179,12 +182,18 @@ local function updateAuraList(frame, kind)
 			break
 		end
 
-		local name, rank, icon, count, duration, expirationTime, auraType = getAuraByIndex(unit, kind, i)
+		local name, rank, icon, count, duration, expirationTime, auraType, isPlayer = getAuraByIndex(unit, kind, i)
 		if not name then
 			slots[i]:Hide()
 			break
 		end
 		local slot = slots[i]
+		-- Relative scaling: base icons are 15% smaller; self-cast auras are 15% larger
+		if cfg.enlarge and cfg.enlarge.SELF and isPlayer then
+			slot:SetScale(1.15)
+		else
+			slot:SetScale(1)
+		end
 		setIconBorderColor(slot, auraType, kind)
 		slot.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
 		slot.icon:SetShown(icon and true)
