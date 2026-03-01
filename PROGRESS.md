@@ -70,6 +70,8 @@
 ## Next Action
 Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras. Run `phase2/test/checklist.md` then complete `phase2/review/decision.md`.
 
+**Tooling (done):** `build-syntax-validation` complete — `./build/build.sh` now runs `luac -p` syntax check + TOC file-existence check before copying. Next tooling item: `build-wow-api-validation` (globals whitelist + stub load test), now unblocked.
+
 **Ralph Phase 1 (input & backlog):** For structured feature status and “what’s next,” see **`docs/ralph/README.md`** and **`docs/ralph/backlog.json`**. Slice work using **`docs/ralph/slicing-guide.md`** (one task = one checkbox or one file/one concern). For a **short process overview** (all steps in one place), see **`PROCESS.md`** at repo root.
 
 ---

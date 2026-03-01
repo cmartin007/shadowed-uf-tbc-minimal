@@ -58,6 +58,15 @@ Use clear, descriptive commit messages:
 
 Always test changes locally before pushing to repo.
 
+**Agentic self-correction command:** `./build/build.sh`
+Run this after every code change. It will:
+1. **Syntax check** — `luac -p` on all first-party `.lua` source files; exits 1 on any error.
+2. **TOC check** — every path in `ShadowedUnitFrames.toc` must exist on disk; exits 1 on any missing file.
+3. **Lint** (if `luacheck` installed) — errors fail the build; warnings are ignored.
+4. **Copy** to `build/release/` and deploy to WoW addon folder.
+
+A clean `build.sh` pass is the minimum bar before any commit. If the build fails, fix the reported error and re-run — do not commit until it passes.
+
 ## 6. No Breaking Changes
 
 - Don't remove features without discussion
@@ -140,4 +149,4 @@ Always test changes locally before pushing to repo.
 
 ---
 
-**Last Updated:** 2026-03-02
+**Last Updated:** 2026-03-02 (build-syntax-validation — §5 updated)

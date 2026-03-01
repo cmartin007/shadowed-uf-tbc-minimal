@@ -1,5 +1,12 @@
 # Phase 2 Changes Log
 
+## 2026-03-02: CLI syntax validation in build.sh
+- **build/build.sh:** Added two unconditional pre-checks that run before `rm -rf build/release/`, so a failure never leaves a partial build.
+  - **Check 1 — `luac -p` syntax check:** Runs on all first-party `.lua` source files (`ShadowedUnitFrames.lua`, `localization/enUS.lua`, `modules/*.lua`). Requires `luac` (install: `sudo apt-get install -y lua5.1`). Exits 1 with file + error line on any syntax failure. Third-party Ace3 libs excluded.
+  - **Check 2 — TOC file-existence check:** Parses `ShadowedUnitFrames.toc`, skips `##` metadata and `#` comments, converts `\` to `/`, and asserts each listed file exists on disk. Exits 1 listing every missing path.
+- **RULES.md §5:** Updated to document `./build/build.sh` as the agentic self-correction command; lists the four build stages and sets "clean build.sh pass" as the minimum bar before any commit.
+- **docs/ralph/backlog.json:** `build-syntax-validation` set to `passes: true`; unblocks `build-wow-api-validation`.
+
 ## 2026-02-26: Level number color by level differential
 - **modules/tags.lua:** Level tag `[level]` now colors the level number by differential to player level (quest-style): grey (trivial, 10+ below), green (slightly lower), yellow (same-ish, ±2), red (much higher). Uses `UnitLevel(unit)` and `UnitLevel("player")` only; helper `getLevelDiffColorHex(unitLevel, playerLevel)` returns WoW hex; player’s own level left uncolored. Level configured in defaultlayout.lua (e.g. target `[level( )][perpp]` line 872).
 - **2026-02-26:** `[classification]` tag now uses short symbols: `R` for rare, `+` for elite, `R+` for rare elite (worldboss stays `Boss`). Defaultlayout text like `[classification( )][perpp]` will show these flags before percent.

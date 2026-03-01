@@ -12,6 +12,66 @@ echo "=== Building SUF TBC Minimal ==="
 echo "Repo: $REPO_DIR"
 echo ""
 
+# ── Check 1: Lua syntax (luac -p on first-party source files) ───────────────
+# Runs on source files before the release dir is touched so a syntax error
+# never leaves a partial build.  Third-party libs (Ace3) are skipped.
+echo "=== Syntax Check (luac -p) ==="
+if ! command -v luac &> /dev/null; then
+    echo "ERROR: luac not found."
+    echo "Install: sudo apt-get install -y lua5.1   (or lua5.4)"
+    exit 1
+fi
+
+SYNTAX_FAILED=0
+SYNTAX_SOURCES=(
+    "$REPO_DIR/ShadowedUnitFrames.lua"
+    "$REPO_DIR/localization/enUS.lua"
+)
+for f in "$REPO_DIR/modules/"*.lua; do
+    SYNTAX_SOURCES+=("$f")
+done
+
+for f in "${SYNTAX_SOURCES[@]}"; do
+    [ -f "$f" ] || continue
+    OUTPUT=$(luac -p "$f" 2>&1) || {
+        echo "  SYNTAX ERROR: ${f#"$REPO_DIR"/}"
+        echo "    $OUTPUT"
+        SYNTAX_FAILED=1
+    }
+done
+
+if [ "$SYNTAX_FAILED" -eq 1 ]; then
+    echo "=== Syntax: FAILED — fix errors above ==="
+    exit 1
+fi
+echo "=== Syntax: OK ==="
+echo ""
+
+# ── Check 2: TOC file-existence check ───────────────────────────────────────
+# Every path listed in the TOC must exist on disk.  Catches the common mistake
+# of renaming a file without updating the TOC (silent load failure in WoW).
+echo "=== TOC File Check ==="
+TOC_FAILED=0
+while IFS= read -r line; do
+    # Skip blank lines, ## metadata, and # comment-only lines
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    # Normalise Windows backslashes to forward slashes
+    filepath="${line//\\//}"
+    if [ ! -f "$REPO_DIR/$filepath" ]; then
+        echo "  MISSING: $filepath"
+        TOC_FAILED=1
+    fi
+done < "$REPO_DIR/ShadowedUnitFrames.toc"
+
+if [ "$TOC_FAILED" -eq 1 ]; then
+    echo "=== TOC Check: FAILED — update TOC or restore missing files ==="
+    exit 1
+fi
+echo "=== TOC Check: OK ==="
+echo ""
+
+# ── Both pre-checks passed; safe to rebuild the release dir ─────────────────
+
 # Check for luacheck or lua-check (Ubuntu package name)
 if command -v luacheck &> /dev/null; then
     LUA_LINTER=luacheck

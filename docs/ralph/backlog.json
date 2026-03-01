@@ -2,7 +2,7 @@
   "$schema": "Ralph Phase 1 backlog: feature list with passes, scope, dependencies.",
   "project": "SUF TBC Minimal",
   "target": "WoW Classic Anniversary TBC only",
-  "updated": "2026-03-02",
+  "updated": "2026-03-02 (build-syntax-validation complete)",
   "features": [
     {
       "id": "phase1-mvp",
@@ -125,7 +125,7 @@
       "id": "build-syntax-validation",
       "feature": "CLI syntax validation in build.sh (luac + TOC check)",
       "phase": "tooling",
-      "passes": false,
+      "passes": true,
       "scope": "Two unconditional checks added to build.sh that run before any file is copied, so the agent gets a fast, reliable fail signal it can self-correct against without loading WoW.\n\n1. luac -p syntax check: for every .lua file in modules/, localization/, libs/ root, and ShadowedUnitFrames.lua, run `luac -p <file>`. Collect all failures and print them, then exit 1 if any failed. No luacheck install required — just the `lua` package (sudo apt install lua5.1 or lua5.4). Runs on source files before the copy step.\n\n2. TOC file-existence check: parse ShadowedUnitFrames.toc, extract every line that ends in .lua or .xml (skip ## comments and blank lines), resolve each path relative to the repo root, and assert the file exists. Print each missing path and exit 1 if any are absent.\n\nBoth checks must: (a) print a clear, actionable error line per failure, (b) exit non-zero so `set -e` stops the build, and (c) run before the rm -rf $BUILD_DIR step so a failed check never leaves a partial build. Update RULES.md section 5 (Test Before Push) to note that `./build/build.sh` is the agentic self-correction command and passes only when both checks are green.",
       "dependencies": [],
       "notes": "Motivation: agentic self-correction loop needs at least one CLI-runnable validation signal. luac -p catches syntax errors (missing `end`, bad string escapes, etc.) without needing any WoW-specific stubs. TOC check catches the most common deploy-breaking mistake (file added to TOC but not on disk, or renamed without updating TOC). luacheck (already in build.sh) remains as an optional deeper lint on top of these two hard checks."
