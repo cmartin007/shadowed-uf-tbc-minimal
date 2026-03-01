@@ -63,6 +63,7 @@ MODULES=(
     "basecombopoints"
     "cast"
     "auras"
+    "range"
     "tags")
 
 for mod in "${MODULES[@]}"; do

@@ -14,3 +14,12 @@
 2026-02-26 | Findings | UnitAura (TBC Classic Anniversary) positions: name(1), texture(2), count(3), auraType(4), duration(5), endTime(6), caster(7), isStealable(8), shouldConsolidate(9), spellId(10). No rank return (removed in Classic versions).
 2026-02-26 | Findings | UnitAura buff name may differ from spell name visible in client. Always match by spellId (numeric key in whitelist) with name as fallback.
 2026-02-26 | Logics   | auras OnEnable only creates containers for kinds enabled at the moment it runs. If a new kind is enabled later (e.g. buffs added after the frame was initialized), use lazy container creation in updateAuraList via buildContainer.
+2026-02-26 | Findings | UnitInRange(unit) returns false when OOR, nil when range cannot be determined (e.g. unit not in a range-checkable state). Always treat nil as in-range to avoid false fading.
+2026-02-26 | Findings | units.lua already has SetRangeAlpha / DisableRangeAlpha on every frame. Use these instead of SetAlpha directly in range/fader modules so multiple systems don't stomp each other's alpha.
+2026-02-26 | Logics   | TBC has no range-change event; range fader must use a shared OnUpdate throttle (~0.5 s). Share a single updater frame across all active frames (not one per frame) to minimise per-tick overhead.
+2026-02-26 | Findings | WoW Lua loader rejects files containing non-ASCII bytes (e.g. em-dash U+2013). Use only ASCII in all Lua source files including comments.
+2026-02-26 | Findings | build.sh has a hardcoded MODULES array. Any new module file MUST be added to both the TOC and the MODULES array in build/build.sh or it will not be copied to the build/release folder.
+2026-02-26 | Findings | UnitInRange uses ~40 yard beneficial spell cast range (heal range). This is the conventional threshold for party frame fade indicators in healer UIs.
+2026-02-26 | Findings | UnitInRange always returns false for hostile units (can't cast beneficial spells on enemies). Use IsSpellInRange(spellName, unit) for hostile range checks instead.
+2026-02-26 | Findings | IsSpellInRange returns 1 (in range), 0 (OOR), nil (spell unlearned or wrong target type). Treat nil as in-range to avoid false fading when the player hasn't learned the spell yet.
+2026-02-26 | Logics   | Per-class max-range attack spell table (CLASS_RANGE_SPELL) resolved once at module load time into a single `hostileRangeSpell` local. No per-poll table lookup needed.

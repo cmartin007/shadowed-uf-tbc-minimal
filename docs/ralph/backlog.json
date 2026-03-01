@@ -104,6 +104,24 @@
       "notes": "Player frame only. Uses spell ID keys for robustness (e.g. [16870] = true for Clearcasting). buildContainer now defined before updateAuraList to avoid Lua nil-global trap."
     },
     {
+      "id": "party-out-of-range-fade",
+      "feature": "Party frame fade when member is out of range",
+      "phase": "phase3",
+      "passes": true,
+      "scope": "Detect when a party member is out of range and fade their unit frame to a lower alpha (e.g. 0.4). Poll or use UNIT_FLAGS/UNIT_CONNECTION events to check `UnitInRange(unit)` or `CheckInteractDistance`. Restore full alpha when back in range. Player frame unaffected. Ideally reuse or extend any existing combat fader alpha infrastructure.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "TBC API: `UnitInRange(unit)` returns true/false for party1–party4. May need a periodic OnUpdate poll since there is no dedicated range-change event in TBC."
+    },
+    {
+      "id": "castbar-border-color-per-unit",
+      "feature": "Per-unit cast bar border color",
+      "phase": "phase2",
+      "passes": false,
+      "scope": "Add optional `borderColor = {r, g, b, a}` field to castBar config in defaultlayout.lua for each unit. Modify `setCastBarBorderColor` in modules/cast.lua to read `config.borderColor` when present, falling back to the current hardcoded dark grey (0.25, 0.25, 0.25, 1). No other changes needed.",
+      "dependencies": ["phase2-cast-bar"],
+      "notes": "Motivated by wanting the target cast bar a different color from the player. Config change only in defaultlayout.lua once cast.lua supports it."
+    },
+    {
       "id": "cleanup-wip-container",
       "feature": "Codebase cleanup implementation (WIP container)",
       "phase": "phase2",

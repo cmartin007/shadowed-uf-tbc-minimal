@@ -62,6 +62,7 @@
 ## What's Working
 - Core files retained: units, layout, health, power, defaultlayout, helpers, basecombopoints, tags, **cast**, auras
 - Addon runs in WoW without errors; player, pet, and target unit frames display correctly (see phase1/review/phase1-unit-frames-proof.png)
+- **Party range fader:** `modules/range.lua` fades party frames to 0.4 alpha when a member is OOR; restores to 1.0 when back in range. Polls `UnitInRange` every 0.5 s on a shared updater frame. Nil return treated as in-range.
 - **Phase 2 auras:** Auras module with buff/debuff icons (TBC UnitBuff/UnitDebuff), positioning from defaultlayout (anchorPoint, x, y), debuff-type borders, OmniCC-compatible Cooldown frame; unit frame borders disabled (backdrop edgeSize 0); target/targettarget positions swapped (ToT top, target below). **Mouseover tooltips** via `GameTooltip:SetUnitAura` (rank-correct). **Alignment:** Target auras use `anchorTo = "$healthBar"` so icons start on the same x axis as the health bar. **Self-cast enlargement:** Player's own debuffs on target render at 1.30× scale (Button frames + SetScale), bottom-aligned with smaller debuffs from other casters. **Player buff whitelist:** Player buffs enabled with a hardcoded whitelist (`playerBuffWhitelist` table in `defaultlayout.lua`); supports spell IDs (preferred) and names; icons anchored above the player health bar.
 - **Phase 2 cast bar:** Cast bar for player and target (UnitCastingInfo/UnitChannelInfo); name and time text; castColors; **detached** 80px below player and target frames; **smooth animation** via shared UIParent updater frame; **spark** at fill edge; **2px dark yellow border**; no background (transparent unfilled). **Blizzard cast bar:** Default `hidden.cast = true` hides Blizzard player/pet cast bar only; SUF cast bars are independent and always show when casting. Health dispel color uses UnitDebuff when C_UnitAuras/AuraUtil absent.
 - **Combo points:** Player combo points handled by `modules/basecombopoints.lua` as a dedicated widget; detached row of small round red dots anchored just above the player health bar, shown only when the player has combo points (rogue/cat).
@@ -74,6 +75,9 @@ Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras. Run `
 ---
 
 ## Changelog
+
+### 2026-02-26 (party + target out-of-range fade)
+- **range fader:** New `modules/range.lua`. Enabled for party and target frames. Friendly units use `UnitInRange` (~40 yd); hostile units use `IsSpellInRange` with a per-class spell (`CLASS_RANGE_SPELL` — Fireball, Wrath, Shadow Bolt, etc.). `nil` from either API treated as in-range. Warriors/rogues always full alpha on hostile targets. Two load bugs fixed during testing: non-ASCII em-dash rejected by WoW Lua loader; `range` missing from `build.sh` MODULES array.
 
 ### 2026-02-26 (player buff whitelist + bug fixes)
 - **player-buff-whitelist:** Enabled player buffs on the player frame filtered by a named whitelist table (`playerBuffWhitelist`) in `defaultlayout.lua`. Whitelist uses spell IDs (numeric keys, preferred) and/or names; Clearcasting (16870), Tiger's Fury, Barkskin, Nature's Swiftness currently defined. `scanAuras` returns `spellId`; `updateAuraList` checks `whitelist[spellId]` then `whitelist[name]`. Scan index decoupled from button slot so filtering doesn't break icon positioning. `whitelist = {}` added to AceDB defaults so `verifyTable` does not strip the table.
