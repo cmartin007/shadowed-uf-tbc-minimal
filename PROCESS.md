@@ -43,6 +43,9 @@ Short overview of how we work. Details live in the linked docs.
    - If **no**, leave ESSENTIAL_FEATURES unchanged but note any questions in **`docs/CULL_INVESTIGATION.md`** or phase feedback.  
    Complete **phaseN/review/decision.md** when closing a phase.
 
+   **RULES.md review (every loop, non-optional):**  
+   Before closing the loop, re-read **`RULES.md`** and ask: did this slice surface any new gotcha, wrong assumption, or pattern the AI needs to know next time? If yes, add a concise bullet to the relevant section (most new findings go in **section 9**). Update the **Last Updated** date. Keep the file under ~300 lines — if adding a finding would push it over, compress or remove an entry that is now obvious or obsolete. `RULES.md` is the primary context file loaded at the start of every session; all other docs are reference-only and must not be loaded by default.
+
 ---
 
 ## Quick Links

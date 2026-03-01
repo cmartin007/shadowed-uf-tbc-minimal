@@ -2,7 +2,7 @@
   "$schema": "Ralph Phase 1 backlog: feature list with passes, scope, dependencies.",
   "project": "SUF TBC Minimal",
   "target": "WoW Classic Anniversary TBC only",
-  "updated": "2026-02-26",
+  "updated": "2026-03-02",
   "features": [
     {
       "id": "phase1-mvp",
@@ -120,6 +120,24 @@
       "scope": "Add optional `borderColor = {r, g, b, a}` field to castBar config in defaultlayout.lua for each unit. Modify `setCastBarBorderColor` in modules/cast.lua to read `config.borderColor` when present, falling back to the current hardcoded dark grey (0.25, 0.25, 0.25, 1). No other changes needed.",
       "dependencies": ["phase2-cast-bar"],
       "notes": "Motivated by wanting the target cast bar a different color from the player. Config change only in defaultlayout.lua once cast.lua supports it."
+    },
+    {
+      "id": "build-syntax-validation",
+      "feature": "CLI syntax validation in build.sh (luac + TOC check)",
+      "phase": "tooling",
+      "passes": false,
+      "scope": "Two unconditional checks added to build.sh that run before any file is copied, so the agent gets a fast, reliable fail signal it can self-correct against without loading WoW.\n\n1. luac -p syntax check: for every .lua file in modules/, localization/, libs/ root, and ShadowedUnitFrames.lua, run `luac -p <file>`. Collect all failures and print them, then exit 1 if any failed. No luacheck install required — just the `lua` package (sudo apt install lua5.1 or lua5.4). Runs on source files before the copy step.\n\n2. TOC file-existence check: parse ShadowedUnitFrames.toc, extract every line that ends in .lua or .xml (skip ## comments and blank lines), resolve each path relative to the repo root, and assert the file exists. Print each missing path and exit 1 if any are absent.\n\nBoth checks must: (a) print a clear, actionable error line per failure, (b) exit non-zero so `set -e` stops the build, and (c) run before the rm -rf $BUILD_DIR step so a failed check never leaves a partial build. Update RULES.md section 5 (Test Before Push) to note that `./build/build.sh` is the agentic self-correction command and passes only when both checks are green.",
+      "dependencies": [],
+      "notes": "Motivation: agentic self-correction loop needs at least one CLI-runnable validation signal. luac -p catches syntax errors (missing `end`, bad string escapes, etc.) without needing any WoW-specific stubs. TOC check catches the most common deploy-breaking mistake (file added to TOC but not on disk, or renamed without updating TOC). luacheck (already in build.sh) remains as an optional deeper lint on top of these two hard checks."
+    },
+    {
+      "id": "build-wow-api-validation",
+      "feature": "WoW TBC API validation: globals whitelist + stub load test",
+      "phase": "tooling",
+      "passes": false,
+      "scope": "Two complementary checks that validate WoW-specific API usage without running the game client. Neither replaces in-game testing but both give the agent a CLI signal before WoW is ever launched.\n\n**Layer 1 — luacheck globals whitelist (.luacheckrc)**\nCreate a `.luacheckrc` in the repo root. Set `std = 'none'` so luacheck assumes no built-in globals. Define a `globals` list containing every WoW TBC Anniversary API the addon is allowed to call (UnitHealth, UnitAura, UnitBuff, UnitDebuff, UnitCastingInfo, UnitChannelInfo, UnitClass, UnitExists, UnitIsAFK, UnitInRange, IsSpellInRange, CreateFrame, UIParent, GameTooltip, CopyTable, MAX_PARTY_MEMBERS, MAX_RAID_MEMBERS, MAX_BOSS_FRAMES, SlashCmdList, SLASH_*, etc.). Also list WoW-injected addon globals (ShadowUF, LibStub). Explicitly **exclude** known retail-only APIs (GetSpecialization, C_UnitAuras, AuraUtil, BackdropTemplateMixin) — luacheck will flag any usage as an undefined global. Update build.sh so this config is used when luacheck runs; make luacheck required (not optional) if it is installed in the dev environment, otherwise document install step. The `.luacheckrc` globals list becomes the machine-readable source of truth for the TBC API whitelist, cross-referencing docs/API_REFERENCE.md.\n\n**Layer 2 — stub-based load test (test/stubs.lua + test/run.lua)**\nCreate `test/stubs.lua` that defines no-op versions of every WoW API and global constant the addon touches at load time: CreateFrame returns a table with no-op methods (SetPoint, SetSize, SetScript, RegisterEvent, RegisterUnitEvent, Show, Hide, etc.), UnitHealth/UnitClass/etc. return safe defaults, LibStub is a minimal stub, AceDB-3.0 returns an object with RegisterCallback no-op. Create `test/run.lua` that dofile()s stubs then dofile()s each source module in TOC order. Run with `lua test/run.lua`; any load-time nil-index or undefined-global error fails the test. Add this to build.sh as a step after the syntax check and before the file copy. This catches a class of errors that already appear in RULES.md section 9 (e.g. db.global nil because global table missing from AceDB defaults, buildContainer defined after its first call site) — errors that currently only surface after loading WoW.\n\nBoth checks must exit non-zero with a clear per-error message. Neither check validates in-game runtime behavior (event flow, frame rendering) — that remains a manual WoW test.",
+      "dependencies": ["build-syntax-validation"],
+      "notes": "Motivation: RULES.md section 8 lists retail-only APIs to avoid (GetSpecialization, C_UnitAuras, AuraUtil). Currently no tooling enforces this; an agent can introduce a retail API and only discover the error after loading WoW. Layer 1 makes the whitelist machine-checkable. Layer 2 catches load-time errors that already appear in RULES.md section 9 gotchas (db.global nil, buildContainer ordering, etc.). Known limitation: stubs cannot replicate WoW's OOP frame system or event dispatch — only load-time globals and call paths are tested."
     },
     {
       "id": "cleanup-wip-container",
