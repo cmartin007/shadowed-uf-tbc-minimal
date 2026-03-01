@@ -86,6 +86,24 @@
       "notes": "Done: docs/cleanup-plan.md. Design-only; refine into smaller slices before implementation."
     },
     {
+      "id": "self-cast-debuff-enlarge",
+      "feature": "Self-cast debuff enlargement on target",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Auras module rewrite: Button frames with SetScale for self-cast debuffs (1.30x), caster detection via sourceUnit/playerUnits lookup, bottom-aligned positioning so mixed-scale icons share a baseline, debuff-type-colored borders. Supports both C_UnitAuras and UnitAura fallback paths.",
+      "dependencies": ["phase2-auras"],
+      "notes": "Key learnings: SetScale only works on Button frames (not Frame); isFromPlayerOrPlayerPet is true for all player-type casters, must use sourceUnit directly; bottom-align via BOTTOMLEFT/BOTTOMRIGHT anchoring."
+    },
+    {
+      "id": "player-buff-whitelist",
+      "feature": "Whitelisted buffs on player frame",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "Enable player buffs with a hardcoded whitelist: only whitelisted buffs are shown. Whitelist is a named Lua table `playerBuffWhitelist` at the top of LoadDefaultLayout in defaultlayout.lua, passed as `whitelist = playerBuffWhitelist` in the player buffs config. auras.lua checks spellId (preferred) then name; no whitelist = show all. whitelist = {} in AceDB defaults prevents verifyTable from stripping it. Lazy container creation in updateAuraList ensures the buffs container exists even if buffs were enabled after OnEnable ran.",
+      "dependencies": ["phase2-auras"],
+      "notes": "Player frame only. Uses spell ID keys for robustness (e.g. [16870] = true for Clearcasting). buildContainer now defined before updateAuraList to avoid Lua nil-global trap."
+    },
+    {
       "id": "cleanup-wip-container",
       "feature": "Codebase cleanup implementation (WIP container)",
       "phase": "phase2",

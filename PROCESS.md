@@ -6,7 +6,7 @@ Short overview of how we work. Details live in the linked docs.
 
 ## Where to start
 
-**Each time you sit down to work:** start at **step 1** — **review the backlog** (read and show its state). Then **step 2** — **backlog grooming with you** (clarify scope, adjust order/deps, agree on next). Only then pick the next task (step 3), slice (step 4), and execute (step 5). Do **not** skip review or grooming: the loop is *input → review → **groom** → pick → slice → execute → feedback*.
+**Each time you sit down to work:** start at **step 1** — **review the backlog** (read and show its state). Then **step 2** — **backlog grooming with you** (clarify scope, adjust order/deps, agree on next). Only then pick the next task (step 3), slice (step 4), and execute (step 5). Do **not** skip review or grooming: the loop is *input → review → **groom** → pick → slice → execute → **simplify** → feedback*.
 
 **Step 1 in practice:** Open **`docs/ralph/backlog.json`**, list which features have `passes: true` vs `passes: false`, and identify the **next** feature (first `passes: false` with all dependencies satisfied).  
 **Step 2 in practice:** Groom the backlog with the human: confirm or change scope, order, dependencies; agree on which feature is “next”; then proceed to slice and execute.
@@ -34,6 +34,9 @@ Short overview of how we work. Details live in the linked docs.
 5. **Execute**  
    Do the task: edit, run **`./build/build.sh`**, test in WoW. Update the phase **CHANGES.md** and **PROGRESS.md** as per **`RULES.md`**.
 
+5b. **Simplify** (after code works)  
+   Review only the files changed in this slice for: reuse opportunities (duplicated logic, inlinable one-liners), quality (dead code, naming, readability), and efficiency (redundant ops, over-engineering). Apply fixes, re-run **`./build/build.sh`**. No behaviour changes — structure only. Skip if nothing to simplify.
+
 6. **Feedback & decisions**  
    Run the phase **test checklist** (`phaseN/test/checklist.md`). When the feature is fully verified, set **`passes: true`** for that feature in **`docs/ralph/backlog.json`**. For each completed feature, make a quick decision: **does this become part of the minimal “must not break” surface?**  
    - If **yes**, add or update an entry in **`docs/ESSENTIAL_FEATURES.md`** explaining where it lives and why it is essential.  
@@ -56,4 +59,4 @@ Short overview of how we work. Details live in the linked docs.
 
 ---
 
-*This process follows the “Ralph Loop” from `docs/agent-looping-flow.png`: gather input → backlog → slice → execute → feedback → repeat.*
+*This process follows the “Ralph Loop” from `docs/agent-looping-flow.png`: gather input → backlog → slice → execute → simplify → feedback → repeat.*

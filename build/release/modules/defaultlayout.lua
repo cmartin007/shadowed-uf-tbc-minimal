@@ -109,6 +109,16 @@ local function finalizeData(config, useMerge)
 	end
 end
 
+-- Player buff whitelist: only these buffs are shown on the player frame.
+-- Use numeric spell IDs where known (more reliable than names), string names as fallback.
+local playerBuffWhitelist = {
+	[16870] = true,                   -- Clearcasting (Omen of Clarity)
+	["Tiger's Fury"] = true,
+	["Barkskin"] = true,
+	["Nature's Swiftness"] = true,
+	["Ferocity"] = true, -- Bladefist's Breadth
+}
+
 function ShadowUF:LoadDefaultLayout(useMerge)
 	local config = {}
 	config.bars = {
@@ -396,7 +406,7 @@ function ShadowUF:LoadDefaultLayout(useMerge)
 				sumPending = {enabled = true, anchorPoint = "C", size = 40, x = 0, y = 0, anchorTo = "$parent"},
 			},
 			auras = {
-				buffs = {enabled = false, maxRows = 1, perRow = 8, size = 16, anchorPoint = "BL", anchorTo = "$parent", x = 0, y = 0},
+				buffs = {enabled = true, maxRows = 1, perRow = 4, size = 14, anchorPoint = "TR", anchorTo = "$healthBar", x = -190, y = 5, whitelist = playerBuffWhitelist},
 				debuffs = {enabled = true, maxRows = 1, perRow = 8, size = 15, anchorPoint = "BR", anchorTo = "$parent", x = -192, y = 41},
 			},
 			text = {

@@ -5,3 +5,12 @@
 # Example:
 # 2026-02-26 | Findings | Pattern: ResolveAnchorPoints in defaultlayout.lua converts BL→BOTTOMLEFT for SetPoint.
 # 2026-02-26 | Logics   | Quirk: C_UnitAuras / AuraUtil absent in TBC; use UnitBuff/UnitDebuff.
+2026-02-26 | Findings | SetScale has NO visual effect on CreateFrame("Frame") on Classic Anniversary TBC; must use CreateFrame("Button") for SetScale to work.
+2026-02-26 | Findings | isFromPlayerOrPlayerPet (from C_UnitAuras.GetAuraDataByIndex) is true for ALL player-type casters (not just "player"), so it cannot be used for self-cast detection. Use playerUnits[sourceUnit] instead.
+2026-02-26 | Findings | UnitAura(unit, index, "HARMFUL") returns caster as 7th value (more reliable than UnitDebuff for caster info on TBC).
+2026-02-26 | Logics   | For mixed-scale icons (some at 1.30x, some at 1.0x), anchor with BOTTOMLEFT/BOTTOMRIGHT instead of LEFT/RIGHT so they share a common baseline.
+2026-02-26 | Logics   | SetScale + SetHeight/SetWidth sequence (matching Nevcairiel classic branch renderAura) is the correct pattern: scale the button, then set size. Size is in unscaled coords so the visual result is size * scale.
+2026-02-26 | Findings | Lua gotcha: local functions referenced before their definition are treated as nil globals at call time. Always define helper functions BEFORE the functions that call them, or forward-declare with `local foo`.
+2026-02-26 | Findings | UnitAura (TBC Classic Anniversary) positions: name(1), texture(2), count(3), auraType(4), duration(5), endTime(6), caster(7), isStealable(8), shouldConsolidate(9), spellId(10). No rank return (removed in Classic versions).
+2026-02-26 | Findings | UnitAura buff name may differ from spell name visible in client. Always match by spellId (numeric key in whitelist) with name as fallback.
+2026-02-26 | Logics   | auras OnEnable only creates containers for kinds enabled at the moment it runs. If a new kind is enabled later (e.g. buffs added after the frame was initialized), use lazy container creation in updateAuraList via buildContainer.

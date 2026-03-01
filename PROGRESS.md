@@ -62,7 +62,7 @@
 ## What's Working
 - Core files retained: units, layout, health, power, defaultlayout, helpers, basecombopoints, tags, **cast**, auras
 - Addon runs in WoW without errors; player, pet, and target unit frames display correctly (see phase1/review/phase1-unit-frames-proof.png)
-- **Phase 2 auras:** Auras module with buff/debuff icons (TBC UnitBuff/UnitDebuff), positioning from defaultlayout (anchorPoint, x, y), debuff-type borders, OmniCC-compatible Cooldown frame; unit frame borders disabled (backdrop edgeSize 0); target/targettarget positions swapped (ToT top, target below). **Mouseover tooltips** via `GameTooltip:SetUnitAura` (rank-correct). **Alignment:** Target auras use `anchorTo = "$healthBar"` so icons start on the same x axis as the health bar.
+- **Phase 2 auras:** Auras module with buff/debuff icons (TBC UnitBuff/UnitDebuff), positioning from defaultlayout (anchorPoint, x, y), debuff-type borders, OmniCC-compatible Cooldown frame; unit frame borders disabled (backdrop edgeSize 0); target/targettarget positions swapped (ToT top, target below). **Mouseover tooltips** via `GameTooltip:SetUnitAura` (rank-correct). **Alignment:** Target auras use `anchorTo = "$healthBar"` so icons start on the same x axis as the health bar. **Self-cast enlargement:** Player's own debuffs on target render at 1.30× scale (Button frames + SetScale), bottom-aligned with smaller debuffs from other casters. **Player buff whitelist:** Player buffs enabled with a hardcoded whitelist (`playerBuffWhitelist` table in `defaultlayout.lua`); supports spell IDs (preferred) and names; icons anchored above the player health bar.
 - **Phase 2 cast bar:** Cast bar for player and target (UnitCastingInfo/UnitChannelInfo); name and time text; castColors; **detached** 80px below player and target frames; **smooth animation** via shared UIParent updater frame; **spark** at fill edge; **2px dark yellow border**; no background (transparent unfilled). **Blizzard cast bar:** Default `hidden.cast = true` hides Blizzard player/pet cast bar only; SUF cast bars are independent and always show when casting. Health dispel color uses UnitDebuff when C_UnitAuras/AuraUtil absent.
 - **Combo points:** Player combo points handled by `modules/basecombopoints.lua` as a dedicated widget; detached row of small round red dots anchored just above the player health bar, shown only when the player has combo points (rogue/cat).
 
@@ -74,6 +74,15 @@ Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras. Run `
 ---
 
 ## Changelog
+
+### 2026-02-26 (player buff whitelist + bug fixes)
+- **player-buff-whitelist:** Enabled player buffs on the player frame filtered by a named whitelist table (`playerBuffWhitelist`) in `defaultlayout.lua`. Whitelist uses spell IDs (numeric keys, preferred) and/or names; Clearcasting (16870), Tiger's Fury, Barkskin, Nature's Swiftness currently defined. `scanAuras` returns `spellId`; `updateAuraList` checks `whitelist[spellId]` then `whitelist[name]`. Scan index decoupled from button slot so filtering doesn't break icon positioning. `whitelist = {}` added to AceDB defaults so `verifyTable` does not strip the table.
+- **buildContainer scope fix:** `buildContainer` was defined after `updateAuraList` in `auras.lua` — Lua resolved it as a nil global and silently dropped the call; moved definition before `updateAuraList`.
+- **Lazy container creation:** `updateAuraList` now calls `buildContainer` on demand if the container for a kind is nil; fixes cases where buffs were enabled in the config after `OnEnable` already ran (container would never be created otherwise).
+- **Simplify pass (auras.lua):** Removed dead `button.isSelfScaled` and `button.duration` fields; inlined `categorizeAura` into `updateAuraList`; removed redundant `enabled = true` from `getConfig` return; extracted `buildContainer` as a named local.
+
+### 2026-02-26 (self-cast debuff enlargement)
+- **self-cast-debuff-enlarge:** Rewrote `modules/auras.lua` to enlarge self-cast debuffs on target (1.30× scale via SetScale on Button frames). Caster detection via `playerUnits[sourceUnit]`; bottom-aligned positioning (BOTTOMLEFT/BOTTOMRIGHT) so mixed-scale icons share a baseline. Debuff-type-colored borders preserved. Added to backlog (passes: true), ESSENTIAL_FEATURES.md, and phase2 CHANGES.md.
 
 ### 2026-02-26 (Ralph Phase 1 – input & requirement gathering)
 - **docs/ralph/:** Added Ralph Phase 1 setup for structured input and backlog: **README.md** (how we use Phase 1, workflow), **backlog.json** (feature list with passes, scope, dependencies), **slicing-guide.md** (how to slice into agent-sized tasks).

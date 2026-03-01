@@ -9,38 +9,36 @@ local SPACING = 5
 local SIZE_MULTIPLIER = 2
 local BORDER_SIZE = 2
 
-local function addIconBorder(slot)
-	slot.borderTop = slot:CreateTexture(nil, "OVERLAY")
-	slot.borderTop:SetPoint("TOPLEFT", slot, "TOPLEFT", -BORDER_SIZE, BORDER_SIZE)
-	slot.borderTop:SetPoint("TOPRIGHT", slot, "TOPRIGHT", BORDER_SIZE, BORDER_SIZE)
-	slot.borderTop:SetHeight(BORDER_SIZE)
+local playerUnits = {player = true, pet = true}
+local SELF_SCALE = 1.30
 
-	slot.borderBottom = slot:CreateTexture(nil, "OVERLAY")
-	slot.borderBottom:SetPoint("BOTTOMLEFT", slot, "BOTTOMLEFT", -BORDER_SIZE, -BORDER_SIZE)
-	slot.borderBottom:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", BORDER_SIZE, -BORDER_SIZE)
-	slot.borderBottom:SetHeight(BORDER_SIZE)
+local function addIconBorder(button)
+	button.borderTop = button:CreateTexture(nil, "OVERLAY")
+	button.borderTop:SetPoint("TOPLEFT", button, "TOPLEFT", -BORDER_SIZE, BORDER_SIZE)
+	button.borderTop:SetPoint("TOPRIGHT", button, "TOPRIGHT", BORDER_SIZE, BORDER_SIZE)
+	button.borderTop:SetHeight(BORDER_SIZE)
 
-	slot.borderLeft = slot:CreateTexture(nil, "OVERLAY")
-	slot.borderLeft:SetPoint("TOPLEFT", slot, "TOPLEFT", -BORDER_SIZE, BORDER_SIZE)
-	slot.borderLeft:SetPoint("BOTTOMLEFT", slot, "BOTTOMLEFT", -BORDER_SIZE, -BORDER_SIZE)
-	slot.borderLeft:SetWidth(BORDER_SIZE)
+	button.borderBottom = button:CreateTexture(nil, "OVERLAY")
+	button.borderBottom:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", -BORDER_SIZE, -BORDER_SIZE)
+	button.borderBottom:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", BORDER_SIZE, -BORDER_SIZE)
+	button.borderBottom:SetHeight(BORDER_SIZE)
 
-	slot.borderRight = slot:CreateTexture(nil, "OVERLAY")
-	slot.borderRight:SetPoint("TOPRIGHT", slot, "TOPRIGHT", BORDER_SIZE, BORDER_SIZE)
-	slot.borderRight:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", BORDER_SIZE, -BORDER_SIZE)
-	slot.borderRight:SetWidth(BORDER_SIZE)
+	button.borderLeft = button:CreateTexture(nil, "OVERLAY")
+	button.borderLeft:SetPoint("TOPLEFT", button, "TOPLEFT", -BORDER_SIZE, BORDER_SIZE)
+	button.borderLeft:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", -BORDER_SIZE, -BORDER_SIZE)
+	button.borderLeft:SetWidth(BORDER_SIZE)
+
+	button.borderRight = button:CreateTexture(nil, "OVERLAY")
+	button.borderRight:SetPoint("TOPRIGHT", button, "TOPRIGHT", BORDER_SIZE, BORDER_SIZE)
+	button.borderRight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", BORDER_SIZE, -BORDER_SIZE)
+	button.borderRight:SetWidth(BORDER_SIZE)
 end
 
-local function setIconBorderColor(slot, auraType, kind)
-	local r, g, b, a = 0, 0, 0, 1
-	if kind == "debuffs" and DebuffTypeColor then
-		local color = DebuffTypeColor[auraType or "none"] or DebuffTypeColor.none
-		if color then r, g, b = color.r, color.g, color.b end
-	end
-	slot.borderTop:SetColorTexture(r, g, b, a)
-	slot.borderBottom:SetColorTexture(r, g, b, a)
-	slot.borderLeft:SetColorTexture(r, g, b, a)
-	slot.borderRight:SetColorTexture(r, g, b, a)
+local function setBorderColor(button, r, g, b)
+	button.borderTop:SetColorTexture(r, g, b, 1)
+	button.borderBottom:SetColorTexture(r, g, b, 1)
+	button.borderLeft:SetColorTexture(r, g, b, 1)
+	button.borderRight:SetColorTexture(r, g, b, 1)
 end
 
 local function getConfig(frame, kind)
@@ -50,10 +48,15 @@ local function getConfig(frame, kind)
 	if not auras then return nil end
 	local cfg = auras[kind]
 	if not cfg or not cfg.enabled then return nil end
-	-- Merge with parentUnit defaults for missing keys
 	local parentCfg = parent and parent.auras and parent.auras[kind] or {}
+	local enlarge = cfg.enlarge or parentCfg.enlarge
+	if kind == "debuffs" then
+		if not enlarge then enlarge = {SELF = true} end
+		if enlarge.SELF == nil then enlarge.SELF = true end
+	end
+	local whitelist = cfg.whitelist or parentCfg.whitelist
+	if whitelist and not next(whitelist) then whitelist = nil end
 	return {
-		enabled = true,
 		anchorPoint = cfg.anchorPoint or parentCfg.anchorPoint or "BL",
 		anchorTo = cfg.anchorTo or parentCfg.anchorTo or "$parent",
 		x = cfg.x or parentCfg.x or 0,
@@ -61,31 +64,29 @@ local function getConfig(frame, kind)
 		size = (cfg.size or parentCfg.size or DEFAULT_SIZE) * SIZE_MULTIPLIER,
 		perRow = cfg.perRow or parentCfg.perRow or DEFAULT_PER_ROW,
 		maxRows = cfg.maxRows or parentCfg.maxRows or 1,
-		enlarge = cfg.enlarge or parentCfg.enlarge, -- e.g. { SELF = true }
+		enlarge = enlarge,
+		selfScale = cfg.selfScale or parentCfg.selfScale or SELF_SCALE,
+		whitelist = whitelist,
 	}
 end
 
-local function createIconSlot(parent, size, index)
-	local slot = CreateFrame("Frame", nil, parent)
-	slot:SetSize(size, size)
-	slot:SetScale(1)
-	slot:EnableMouse(true)
-	slot.index = index
-	slot.icon = slot:CreateTexture(nil, "ARTWORK")
-	slot.icon:SetAllPoints()
-	slot.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-	slot.count = slot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-	slot.count:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", 1, 0)
-	slot.count:SetJustifyH("RIGHT")
-	slot.count:SetText("")
-	-- Cooldown frame: OmniCC (and similar addons) hook this to show timer text and style
-	slot.cooldown = CreateFrame("Cooldown", nil, slot)
-	slot.cooldown:SetAllPoints(slot)
-	slot.duration = slot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-	slot.duration:SetPoint("TOP", slot, "BOTTOM", 0, 0)
-	slot.duration:SetText("")
-	addIconBorder(slot)
-	slot:SetScript("OnEnter", function(self)
+local function createButton(parent, size, index)
+	local button = CreateFrame("Button", nil, parent)
+	button:SetHeight(size)
+	button:SetWidth(size)
+	button:EnableMouse(true)
+	button.index = index
+	button.icon = button:CreateTexture(nil, "ARTWORK")
+	button.icon:SetAllPoints(button)
+	button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+	button.count = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+	button.count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, 0)
+	button.count:SetJustifyH("RIGHT")
+	button.count:SetText("")
+	button.cooldown = CreateFrame("Cooldown", nil, button)
+	button.cooldown:SetAllPoints(button)
+	addIconBorder(button)
+	button:SetScript("OnEnter", function(self)
 		local container = self:GetParent()
 		local frame = container:GetParent()
 		local unit = frame and frame.unit
@@ -98,16 +99,16 @@ local function createIconSlot(parent, size, index)
 		GameTooltip:SetUnitAura(unit, idx, filter)
 		GameTooltip:Show()
 	end)
-	slot:SetScript("OnLeave", function()
+	button:SetScript("OnLeave", function()
 		if not (GameTooltip.IsForbidden and GameTooltip:IsForbidden()) then
 			GameTooltip:Hide()
 		end
 	end)
-	slot:Hide()
-	return slot
+	button:Hide()
+	return button
 end
 
-local function positionSlots(container, config, slots)
+local function positionButtons(container, config, buttons)
 	local growth = Layout:GetAuraGrowth(config.anchorPoint)
 	local size = config.size or DEFAULT_SIZE
 	local perRow = config.perRow or DEFAULT_PER_ROW
@@ -115,115 +116,146 @@ local function positionSlots(container, config, slots)
 	local step = size + gap
 	local point, relPoint, dx, dy, rowDx, rowDy
 	if growth == "RIGHT" then
-		point, relPoint, dx, dy = "LEFT", "RIGHT", gap, 0
+		point, relPoint, dx, dy = "BOTTOMLEFT", "BOTTOMRIGHT", gap, 0
 		rowDx, rowDy = 0, -step
 	elseif growth == "LEFT" then
-		point, relPoint, dx, dy = "RIGHT", "LEFT", -gap, 0
+		point, relPoint, dx, dy = "BOTTOMRIGHT", "BOTTOMLEFT", -gap, 0
 		rowDx, rowDy = 0, -step
 	elseif growth == "TOP" then
-		point, relPoint, dx, dy = "BOTTOM", "TOP", 0, gap
+		point, relPoint, dx, dy = "BOTTOMLEFT", "TOPLEFT", 0, gap
 		rowDx, rowDy = step, 0
 	else
-		point, relPoint, dx, dy = "TOP", "BOTTOM", 0, -gap
+		point, relPoint, dx, dy = "TOPLEFT", "BOTTOMLEFT", 0, -gap
 		rowDx, rowDy = step, 0
 	end
 	local pointAnchor, relativeAnchor = ShadowUF.ResolveAnchorPoints(config.anchorPoint)
-	for i, slot in ipairs(slots) do
-		slot:ClearAllPoints()
+	for i, button in ipairs(buttons) do
+		button:ClearAllPoints()
 		if i == 1 then
-			slot:SetPoint(pointAnchor, container, relativeAnchor, 0, 0)
+			button:SetPoint(pointAnchor, container, relativeAnchor, 0, 0)
 		else
 			local col = (i - 1) % perRow
 			if col == 0 then
-				local rowStart = slots[i - perRow]
-				slot:SetPoint(pointAnchor, rowStart, relativeAnchor, rowDx, rowDy)
+				local rowStart = buttons[i - perRow]
+				button:SetPoint(pointAnchor, rowStart, relativeAnchor, rowDx, rowDy)
 			else
-				slot:SetPoint(point, slots[i - 1], relPoint, dx, dy)
+				button:SetPoint(point, buttons[i - 1], relPoint, dx, dy)
 			end
 		end
 	end
 end
 
-local function getAuraByIndex(unit, kind, index)
+local function buildContainer(frame, kind)
+	local cfg = getConfig(frame, kind)
+	if not cfg then return end
+	local container = CreateFrame("Frame", nil, frame)
+	container:SetSize(1, 1)
+	container.kind = kind
+	local pointAnchor, relativeAnchor = ShadowUF.ResolveAnchorPoints(cfg.anchorPoint)
+	local anchorTo = frame
+	if cfg.anchorTo and string.sub(cfg.anchorTo, 1, 1) == "$" and cfg.anchorTo ~= "$parent" then
+		local key = string.sub(cfg.anchorTo, 2)
+		anchorTo = frame[key] or frame
+	end
+	container:SetPoint(pointAnchor, anchorTo, relativeAnchor, cfg.x or 0, cfg.y or 0)
+	container.buttons = {}
+	local maxButtons = (cfg.perRow or DEFAULT_PER_ROW) * (cfg.maxRows or 1)
+	for i = 1, maxButtons do
+		container.buttons[i] = createButton(container, cfg.size or DEFAULT_SIZE, i)
+	end
+	positionButtons(container, cfg, container.buttons)
+	frame.auras[kind] = container
+end
+
+local function scanAuras(unit, kind, index)
+	local filter = (kind == "buffs") and "HELPFUL" or "HARMFUL"
+
 	if C_UnitAuras and C_UnitAuras.GetAuraDataByIndex and AuraUtil and AuraUtil.UnpackAuraData then
-		local filter = (kind == "buffs") and "HELPFUL" or "HARMFUL"
 		local auraData = C_UnitAuras.GetAuraDataByIndex(unit, index, filter)
 		if not auraData then return nil end
 		local name, icon, count, _, duration, expirationTime = AuraUtil.UnpackAuraData(auraData)
 		local auraType = auraData.dispelName
-		local isPlayer = auraData.isFromPlayerOrPlayerPet or auraData.sourceUnit == "player"
-		return name, nil, icon, count, duration, expirationTime, auraType, isPlayer
+		local caster = auraData.sourceUnit
+		return name, icon, count, auraType, duration, expirationTime, caster, auraData.spellId
 	end
 
-	if kind == "buffs" then
-		local name, rank, icon, count, _, duration, expirationTime = UnitBuff(unit, index)
-		return name, rank, icon, count, duration, expirationTime, nil, nil
-	end
-
-	local name, rank, icon, count, auraType, duration, expirationTime = UnitDebuff(unit, index)
-	return name, rank, icon, count, duration, expirationTime, auraType, nil
+	-- positions: name, texture, count, auraType, duration, endTime, caster, isStealable, shouldConsolidate, spellId
+	local name, texture, count, auraType, duration, endTime, caster, _, _, spellId = UnitAura(unit, index, filter)
+	if not name then return nil end
+	return name, texture, count, auraType, duration, endTime, caster, spellId
 end
 
 local function updateAuraList(frame, kind)
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then return end
-	local container = frame.auras and frame.auras[kind]
-	if not container or not container.icons then return end
+	if not frame.auras then return end
+	if not frame.auras[kind] then
+		buildContainer(frame, kind)
+	end
+	local container = frame.auras[kind]
+	if not container or not container.buttons then return end
 	local cfg = getConfig(frame, kind)
 	if not cfg then
 		container:Hide()
 		return
 	end
-	local maxSlots = (cfg.perRow or DEFAULT_PER_ROW) * (cfg.maxRows or 1)
-	local slots = container.icons
+	local maxButtons = (cfg.perRow or DEFAULT_PER_ROW) * (cfg.maxRows or 1)
+	local buttons = container.buttons
 	local shown = 0
-	for i = 1, maxSlots do
-		if not slots[i] then
-			break
-		end
+	for auraIndex = 1, 40 do
+		if shown >= maxButtons then break end
+		local name, texture, count, auraType, duration, endTime, caster, spellId = scanAuras(unit, kind, auraIndex)
+		if not name then break end
+		if not cfg.whitelist or cfg.whitelist[spellId] or cfg.whitelist[name] then
+			local button = buttons[shown + 1]
+			if not button then break end
+			button.index = auraIndex
 
-		local name, rank, icon, count, duration, expirationTime, auraType, isPlayer = getAuraByIndex(unit, kind, i)
-		if not name then
-			slots[i]:Hide()
-			break
+			local color = kind == "debuffs" and DebuffTypeColor and (DebuffTypeColor[auraType or "none"] or DebuffTypeColor.none)
+			if color then
+				setBorderColor(button, color.r, color.g, color.b)
+			else
+				setBorderColor(button, 0, 0, 0)
+			end
+
+			if playerUnits[caster] and cfg.enlarge.SELF then
+				button:SetScale(cfg.selfScale)
+			else
+				button:SetScale(1)
+			end
+
+			button:SetHeight(cfg.size)
+			button:SetWidth(cfg.size)
+
+			button.icon:SetTexture(texture or "Interface\\Icons\\INV_Misc_QuestionMark")
+			button.icon:SetShown(texture and true)
+			if count and count > 1 then
+				button.count:SetText(tostring(count))
+				button.count:Show()
+			else
+				button.count:SetText("")
+				button.count:Hide()
+			end
+			if duration and duration > 0 and endTime and (endTime - GetTime()) > 0 then
+				button.cooldown:SetCooldown(endTime - duration, duration)
+			else
+				button.cooldown:SetCooldown(0, 0)
+			end
+			button:Show()
+			shown = shown + 1
 		end
-		local slot = slots[i]
-		-- Relative scaling: base icons are 15% smaller; self-cast auras are 15% larger
-		if cfg.enlarge and cfg.enlarge.SELF and isPlayer then
-			slot:SetScale(1.15)
-		else
-			slot:SetScale(1)
-		end
-		setIconBorderColor(slot, auraType, kind)
-		slot.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
-		slot.icon:SetShown(icon and true)
-		if count and count > 1 then
-			slot.count:SetText(tostring(count))
-			slot.count:Show()
-		else
-			slot.count:SetText("")
-			slot.count:Hide()
-		end
-		if duration and duration > 0 and expirationTime and (expirationTime - GetTime()) > 0 then
-			-- Set cooldown so OmniCC (and default spiral) can show the timer
-			slot.cooldown:SetCooldown(expirationTime - duration, duration)
-			slot.duration:Hide()
-		else
-			slot.cooldown:SetCooldown(0, 0)
-			slot.duration:SetText("")
-			slot.duration:Hide()
-		end
-		slot:Show()
-		shown = shown + 1
 	end
-	for i = shown + 1, maxSlots do
-		if slots[i] then slots[i]:Hide() end
+	for i = shown + 1, maxButtons do
+		if buttons[i] then
+			buttons[i]:SetScale(1)
+			buttons[i]:Hide()
+		end
 	end
 	container:SetShown(shown > 0)
 end
 
 function Auras:UpdateFilter(frame)
-	-- No-op: required by units.lua when frame.visibility.auras is true. Filtering (whitelist/blacklist) not implemented.
+	-- No-op: required by units.lua when frame.visibility.auras is true.
 end
 
 function Auras:Update(frame)
@@ -236,30 +268,8 @@ function Auras:OnEnable(frame)
 	local unitConfig = ShadowUF.db.profile.units[frame.unitType]
 	if not unitConfig or not unitConfig.auras then return end
 	frame.auras = {}
-	local parent = frame
 	for _, kind in ipairs({"debuffs", "buffs"}) do
-		local cfg = getConfig(frame, kind)
-		if cfg then
-			local container = CreateFrame("Frame", nil, parent)
-			container:SetSize(1, 1)
-			container.kind = kind
-			local pointAnchor, relativeAnchor = ShadowUF.ResolveAnchorPoints(cfg.anchorPoint)
-			local anchorTo = parent
-			if cfg.anchorTo == "$parent" then
-				anchorTo = parent
-			elseif cfg.anchorTo and string.sub(cfg.anchorTo, 1, 1) == "$" then
-				local key = string.sub(cfg.anchorTo, 2)
-				anchorTo = parent[key] or parent
-			end
-			container:SetPoint(pointAnchor, anchorTo, relativeAnchor, cfg.x or 0, cfg.y or 0)
-			container.icons = {}
-			local maxSlots = (cfg.perRow or DEFAULT_PER_ROW) * (cfg.maxRows or 1)
-			for i = 1, maxSlots do
-				container.icons[i] = createIconSlot(container, cfg.size or DEFAULT_SIZE, i)
-			end
-			positionSlots(container, cfg, container.icons)
-			frame.auras[kind] = container
-		end
+		buildContainer(frame, kind)
 	end
 	frame:RegisterUnitEvent("UNIT_AURA", self, "Update")
 	frame:RegisterUpdateFunc(self, "Update")

@@ -45,7 +45,9 @@ Do **not** remove these modules or their registration. Disabling a feature (e.g.
 | **target** | Target frame; health, power, cast bar, auras, tags. |
 
 - **Level-diff color:** `[level]` tag in `modules/tags.lua` colors the level number by quest-style difficulty (grey/green/yellow/red by level differential using TBC grey formula). Do not remove or regress this when changing tags or defaultlayout text like `[level( )][perpp]`.
-- **Live health/power text:** Tags `[curhp]`, `[curmaxhp]`, `[curpp]`, `[curmaxpp]`, `[perhp]`, `[perpp]` in `modules/tags.lua` must update immediately when health or power change, driven by unit events (`UNIT_HEALTH`, `UNIT_MAXHEALTH`, `UNIT_CONNECTION`, `UNIT_POWER_FREQUENT`, `UNIT_MAXPOWER`, `UNIT_DISPLAYPOWER`) wired to `fontString:UpdateTags`. Do not change these tags or their events in a way that reintroduces “only updates on /reload” behavior.
+- **Live health/power text:** Tags `[curhp]`, `[curmaxhp]`, `[curpp]`, `[curmaxpp]`, `[perhp]`, `[perpp]` in `modules/tags.lua` must update immediately when health or power change, driven by unit events (`UNIT_HEALTH`, `UNIT_MAXHEALTH`, `UNIT_CONNECTION`, `UNIT_POWER_FREQUENT`, `UNIT_MAXPOWER`, `UNIT_DISPLAYPOWER`) wired to `fontString:UpdateTags`. Do not change these tags or their events in a way that reintroduces "only updates on /reload" behavior.
+- **Player buff whitelist:** Player buffs in `modules/auras.lua` are filtered by `cfg.whitelist` (a name-keyed table). When the whitelist is non-empty, only named buffs are shown. The whitelist is defined in `modules/defaultlayout.lua` in the player's `auras.buffs` config. `whitelist = {}` must remain in the AceDB defaults (`ShadowedUnitFrames.lua`) so `verifyTable` does not strip it. Do not remove `whitelist` from the defaults or the scan-index/button-slot decoupling in `updateAuraList`.
+- **Self-cast debuff enlargement:** In `modules/auras.lua`, self-cast debuffs on the target render at 1.30x scale via `SetScale` on Button frames. Caster detection uses `playerUnits[sourceUnit]` (not `isFromPlayerOrPlayerPet`). Bottom-aligned positioning ensures mixed-scale icons share a baseline. Do not change aura buttons to Frame (SetScale only works on Button), and do not use `isFromPlayerOrPlayerPet` for self-cast detection (it is true for all player-type casters on Classic Anniversary).
 
 The codebase may still reference other unit types (e.g. targettarget, party, raid) for init or layout merge. **Do not** remove support for player, pet, or target; do not break the path that creates and updates these three frames.
 
@@ -79,7 +81,7 @@ If **profile.tooltipCombat** is used in units.lua for tooltip-in-combat behavior
 | **Backdrop/inset/border** in layout | Frames and cast bar use backdrop table; edgeSize 0 supported for "no border". |
 | **Anchor resolution** | defaultlayout and auras use shorthand (BL, TR); ResolveAnchorPoints (or equivalent) for SetPoint. |
 
-You may simplify media to "resolve once at load" but the pipeline from config → bars/fonts/backdrop → frame appearance must remain.
+You may simplify media to "resolve once at load" but the pipeline from config -> bars/fonts/backdrop -> frame appearance must remain.
 
 ---
 
@@ -97,7 +99,7 @@ Do not remove the hide logic for the Blizzard frames that correspond to units we
 
 ## 7. TOC and build
 
-- **ShadowedUnitFrames.toc** must list all modules in §2 and the libs they depend on (LibStub, CallbackHandler, LibSharedMedia, AceDB, etc.).
+- **ShadowedUnitFrames.toc** must list all modules in section 2 and the libs they depend on (LibStub, CallbackHandler, LibSharedMedia, AceDB, etc.).
 - **build/build.sh** must copy the same set of files so the release build matches.
 
 ---

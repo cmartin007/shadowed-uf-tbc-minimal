@@ -50,6 +50,22 @@ Use this checklist for **one** loop iteration. **Do not skip step 1 or step 2.**
 
 ---
 
+## Step 5b: Simplify (after code works)
+
+Review the files changed in this slice for three things, then apply fixes:
+
+- **Reuse** – duplicated logic, extractable patterns, functions used only once that could be inlined (or vice-versa)
+- **Quality** – readability, naming, dead code (set but never read, always-hidden UI, unreachable branches)
+- **Efficiency** – unnecessary complexity, redundant operations, over-engineered indirection
+
+Rules:
+- Only touch files changed in this slice (don't wander).
+- Do not change behaviour — no logic changes, only structure.
+- Re-run **`./build/build.sh`** after to confirm lint still passes.
+- If there is nothing to simplify, skip this step and note "no simplify needed".
+
+---
+
 ## Step 6: Feedback
 
 - [ ] If this slice completes the **feature** (all its tasks + checklist + review): set that feature’s **`passes: true`** in **`docs/ralph/backlog.json`**.
