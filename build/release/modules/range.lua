@@ -29,9 +29,13 @@ local activeFrames = {}
 
 local function isInRange(frame)
 	if not UnitExists(frame.unit) then return true end
+	if UnitIsUnit(frame.unit, "player") then return true end
 	if UnitIsFriend("player", frame.unit) then
-		-- UnitInRange: false = OOR, nil = can't determine (treat as in-range)
-		return UnitInRange(frame.unit) ~= false
+		-- UnitInRange only works for party*/raid* tokens; returns false for "target" even when adjacent
+		if frame.unit:match("^party%d") or frame.unit:match("^raid%d") then
+			return UnitInRange(frame.unit) ~= false
+		end
+		return true
 	else
 		-- IsSpellInRange: 1 = in range, 0 = OOR, nil = unlearned/N/A (treat as in-range)
 		if not hostileRangeSpell then return true end
