@@ -147,6 +147,15 @@
       "scope": "Placeholder for future cleanup work after plan is ready. Will be replaced by smaller, concrete items (e.g. remove unused module X, simplify units.lua Y).",
       "dependencies": ["cleanup-plan"],
       "notes": "Do not use directly; split into concrete features via grooming."
+    },
+    {
+      "id": "unit-combat-text",
+      "feature": "Floating combat text numbers on unit frames",
+      "phase": "phase2",
+      "passes": true,
+      "scope": "New modules/combattext.lua (~40 lines). Listen to UNIT_COMBAT; delegate display and animation to Blizzard CombatFeedback_OnCombatEvent + CombatFeedback_OnUpdate. Anchor to existing combatText config in defaultlayout.lua (line 304). Add to TOC and build.sh MODULES.",
+      "dependencies": ["phase1-mvp"],
+      "notes": "defaultlayout.lua line 304 already has combatText anchor stub. CombatFeedback_OnCombatEvent confirmed as type 'function' in TBC Anniversary 2.5.5 (verified in-game). Reference: SRTwILeK/ShadowedUnitFrames combattext.lua."
     }
   ]
 }

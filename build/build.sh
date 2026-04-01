@@ -123,6 +123,7 @@ MODULES=(
     "basecombopoints"
     "cast"
     "auras"
+    "combattext"
     "range"
     "tags")
 

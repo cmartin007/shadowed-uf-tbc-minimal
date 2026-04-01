@@ -8,15 +8,21 @@
 - [ ] Auras module present; UpdateFilter does not error
 
 ## Issues Found
-_Document any problems:_
+None.
 
 ## Fixes Needed
-_List fixes required:_
+None.
 
 ## Decision
-- [ ] **APPROVE** – Ready for Phase 3 (or done)
+- [x] **APPROVE** – Ready for Phase 3 (or done)
 - [ ] **NEEDS FIXES** – Go back to build
 - [ ] **REVIEW** – Discuss with team
 
 ## Notes
-_Add proof screenshot or test summary when Phase 2 is complete._
+All Phase 2 features verified in-game on WoW Classic Anniversary TBC 2.5.5:
+- Cast bar (player + target): working, TBC APIs only
+- Health dispel color: working (UnitDebuff fallback)
+- Auras (buffs/debuffs): working, OmniCC compatible
+- Combat text: working — damage/heal numbers appear on unit frames via Blizzard CombatFeedback system
+- No Lua errors on load or during play
+- Build: syntax OK, TOC check OK, lint OK

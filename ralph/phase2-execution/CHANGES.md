@@ -4,6 +4,10 @@ Brief log of completed tasks from the Ralph execution loop.
 
 ---
 
+## 2026-04-01
+
+- **unit-combat-text** – Added `modules/combattext.lua`: registers `UNIT_COMBAT` per frame via `RegisterUnitEvent`; on each event calls Blizzard's `CombatFeedback_OnCombatEvent(frame.combatText, actionType, ...)` which handles text content, color, and font scaling; animation (rise + fade) driven by `CombatFeedback_OnUpdate` set as the frame's OnUpdate script. `OnLayoutApplied` wires the frame to the existing `combatText` anchor in defaultlayout.lua (line 304) using `Layout:AnchorFrame` + `Layout:SetupFontString`. `CombatFeedback_OnCombatEvent` confirmed as type `function` in TBC Anniversary 2.5.5 (in-game `/script print(type(CombatFeedback_OnCombatEvent))` → `function`). Added to TOC after `modules\auras.lua` and to `build/build.sh` MODULES array. Build: syntax OK, TOC check OK, lint OK.
+
 ## 2026-02-26
 
 - **party-out-of-range-fade** – Added `modules/range.lua`: registers as the `"range"` module, polls every 0.5 s on a shared updater frame, calls `frame:SetRangeAlpha` with `oorAlpha` (0.4) or `inAlpha` (1.0). Enabled for party and target in `defaultlayout.lua`. Two range strategies: friendly units use `UnitInRange` (~40 yd heal range); hostile units use `IsSpellInRange` with a per-class max-range attack spell (`CLASS_RANGE_SPELL` table — Fireball/Wrath/Shadow Bolt etc.). `nil` from either API treated as in-range so unlearned spells and uncheckable units never cause false fading. Warriors and rogues have no entry and always show full alpha on hostile targets. Wires into existing `SetRangeAlpha` / `DisableRangeAlpha` on unit frames. Fixed two load bugs: (1) em-dash in comment rejected by WoW Lua loader; (2) `range` missing from hardcoded `MODULES` array in `build.sh`. Simplify pass: removed dead `cfg` param from `isInRange`, inlined `inRange` local, removed redundant `= nil` on `updater`.

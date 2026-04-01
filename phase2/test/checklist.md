@@ -35,6 +35,16 @@
 - [ ] With OmniCC: timer text on aura icons; without OmniCC: cooldown spiral only
 - [ ] Only TBC APIs used in TBC path (UnitBuff/UnitDebuff); no C_UnitAuras or AuraUtil in critical path
 
+### Combat Text
+- [ ] Player takes melee or spell damage — number appears centered on player frame
+- [ ] Player receives healing — number appears on player frame
+- [ ] Target takes damage — number appears on target frame
+- [ ] Critical hit shows larger/different formatted number (handled by Blizzard CombatFeedback)
+- [ ] MISS / DODGE / PARRY / IMMUNE text appears correctly
+- [ ] Numbers fade out and rise; do not persist permanently
+- [ ] No Lua errors from combattext module (esp. no "attempt to call nil" on CombatFeedback_OnCombatEvent)
+- [ ] Combat text hidden when combatText visibility is off for that unit
+
 ### Performance and Size
 - [ ] No noticeable frame drop when casting or when auras update
 - [ ] Build/release size remains reasonable (document in review)

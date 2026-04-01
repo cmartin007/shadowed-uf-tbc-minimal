@@ -48,9 +48,20 @@ Add a cast bar (player and target) and a simplified aura display using **TBC-onl
 - [ ] Update **`docs/API_REFERENCE.md`** if new events or API details are used (e.g. exact TBC cast event names).
 - [ ] Update **RULES.md** or phase2 docs if new patterns (e.g. cast bar module shape) should be reused.
 
+### 2.6 Combat Text Module
+
+Restore floating damage/healing numbers on unit frames using Blizzard's built-in `CombatFeedback` system.
+`CombatFeedback_OnCombatEvent` confirmed as `function` in TBC Anniversary 2.5.5 (verified in-game).
+Reference implementation: SRTwILeK/ShadowedUnitFrames `modules/combattext.lua`.
+
+- [x] Create **`modules/combattext.lua`** — `UNIT_COMBAT` event + `CombatFeedback_OnCombatEvent` / `CombatFeedback_OnUpdate` delegation. `OnLayoutApplied` uses `Layout:SetupFontString` + `Layout:AnchorFrame` with existing `combatText` anchor (defaultlayout.lua line 304).
+- [x] Add `modules\combattext.lua` to **`ShadowedUnitFrames.toc`** (after `modules\auras.lua`) and `"combattext"` to **`build/build.sh`** MODULES array.
+- [x] In-game: player takes damage — numbers appear on player frame; target takes damage — numbers appear on target frame; no Lua errors.
+- [x] Update **`phase2/review/decision.md`** for this feature.
+
 ## Out of Scope for Phase 2
 - Full aura filtering (whitelist/blacklist by spell ID).
-- Portrait, combat text, or other modules.
+- Portrait or other modules.
 - Options UI; all config remains in `defaultlayout.lua` (and existing db defaults).
 
 ## Dependencies

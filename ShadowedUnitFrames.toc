@@ -27,4 +27,5 @@ modules\power.lua
 modules\basecombopoints.lua
 modules\cast.lua
 modules\auras.lua
+modules\combattext.lua
 modules\range.lua

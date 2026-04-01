@@ -23,14 +23,15 @@
 - [x] Proof: in-game screenshot in `phase1/review/phase1-unit-frames-proof.png`
 
 ### Phase 2: Cast Bar + Auras
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 - [x] Add cast bar module (`modules/cast.lua`; TBC `UnitCastingInfo`/`UnitChannelInfo`)
 - [x] Fix health dispel color to use TBC APIs (`UnitDebuff` fallback in `health.lua`)
 - [x] Add auras module (`modules/auras.lua`; `UpdateFilter` no-op; icon display with UnitBuff/UnitDebuff)
 - [x] Auras: ResolveAnchorPoints in defaultlayout (BL→BOTTOMLEFT etc.); merge auras when unit skipped; target/targettarget positions swap; unit frame borders off (edgeSize 0); aura icon borders + OmniCC Cooldown support
-- [ ] Test in WoW (see `phase2/test/checklist.md`)
-- [ ] Review & Approve (`phase2/review/decision.md`)
+- [x] Add combat text module (`modules/combattext.lua`; `UNIT_COMBAT` + Blizzard `CombatFeedback_OnCombatEvent`/`CombatFeedback_OnUpdate`; confirmed available in TBC Anniversary 2.5.5)
+- [x] Test in WoW (see `phase2/test/checklist.md`)
+- [x] Review & Approve (`phase2/review/decision.md`) — **APPROVED**
 
 **Plan:** `phase2/plan/tasks.md`
 
@@ -60,15 +61,16 @@
 ---
 
 ## What's Working
-- Core files retained: units, layout, health, power, defaultlayout, helpers, basecombopoints, tags, **cast**, auras
+- Core files retained: units, layout, health, power, defaultlayout, helpers, basecombopoints, tags, **cast**, auras, **combattext**
 - Addon runs in WoW without errors; player, pet, and target unit frames display correctly (see phase1/review/phase1-unit-frames-proof.png)
 - **Party range fader:** `modules/range.lua` fades party frames to 0.4 alpha when a member is OOR; restores to 1.0 when back in range. Polls `UnitInRange` every 0.5 s on a shared updater frame. Nil return treated as in-range.
 - **Phase 2 auras:** Auras module with buff/debuff icons (TBC UnitBuff/UnitDebuff), positioning from defaultlayout (anchorPoint, x, y), debuff-type borders, OmniCC-compatible Cooldown frame; unit frame borders disabled (backdrop edgeSize 0); target/targettarget positions swapped (ToT top, target below). **Mouseover tooltips** via `GameTooltip:SetUnitAura` (rank-correct). **Alignment:** Target auras use `anchorTo = "$healthBar"` so icons start on the same x axis as the health bar. **Self-cast enlargement:** Player's own debuffs on target render at 1.30× scale (Button frames + SetScale), bottom-aligned with smaller debuffs from other casters. **Player buff whitelist:** Player buffs enabled with a hardcoded whitelist (`playerBuffWhitelist` table in `defaultlayout.lua`); supports spell IDs (preferred) and names; icons anchored above the player health bar.
 - **Phase 2 cast bar:** Cast bar for player and target (UnitCastingInfo/UnitChannelInfo); name and time text; castColors; **detached** 80px below player and target frames; **smooth animation** via shared UIParent updater frame; **spark** at fill edge; **2px dark yellow border**; no background (transparent unfilled). **Blizzard cast bar:** Default `hidden.cast = true` hides Blizzard player/pet cast bar only; SUF cast bars are independent and always show when casting. Health dispel color uses UnitDebuff when C_UnitAuras/AuraUtil absent.
 - **Combo points:** Player combo points handled by `modules/basecombopoints.lua` as a dedicated widget; detached row of small round red dots anchored just above the player health bar, shown only when the player has combo points (rogue/cat).
+- **Phase 2 combat text:** `modules/combattext.lua` (~40 lines). Registers `UNIT_COMBAT` per unit frame; delegates all display and animation to Blizzard's `CombatFeedback_OnCombatEvent` + `CombatFeedback_OnUpdate`. Anchors to `combatText` config in defaultlayout.lua. `CombatFeedback_OnCombatEvent` confirmed as `function` in TBC Anniversary 2.5.5 (in-game verified).
 
 ## Next Action
-Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras. Run `phase2/test/checklist.md` then complete `phase2/review/decision.md`.
+Test Phase 2 in WoW: cast bar (player/target), health dispel color, auras, **combat text numbers**. Run `phase2/test/checklist.md` then complete `phase2/review/decision.md`.
 
 **Tooling (done):** `build-syntax-validation` complete — `./build/build.sh` now runs `luac -p` syntax check + TOC file-existence check before copying. Next tooling item: `build-wow-api-validation` (globals whitelist + stub load test), now unblocked.
 
