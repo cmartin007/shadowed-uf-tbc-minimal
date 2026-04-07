@@ -30,3 +30,19 @@ else
 fi
 
 echo "Done. Addon updated at: $WOW_ADDON_DIR"
+
+# Classic Era / Hardcore (fixed path, WSL)
+CLASSIC_ERA_DIR="/mnt/c/Program Files (x86)/World of Warcraft/_classic_era_/Interface/AddOns/ShadowedUnitFrames"
+if [ -d "$(dirname "$CLASSIC_ERA_DIR")" ]; then
+    echo ""
+    echo "=== Copying SUF to Classic Era/Hardcore ==="
+    echo "To:   $CLASSIC_ERA_DIR"
+    mkdir -p "$CLASSIC_ERA_DIR"
+    if command -v rsync &> /dev/null; then
+        rsync -a --delete "$BUILD_DIR/" "$CLASSIC_ERA_DIR/"
+    else
+        rm -rf "$CLASSIC_ERA_DIR"/*
+        cp -r "$BUILD_DIR"/* "$CLASSIC_ERA_DIR/"
+    fi
+    echo "Done. Addon updated at: $CLASSIC_ERA_DIR"
+fi
