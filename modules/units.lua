@@ -651,7 +651,8 @@ local secureInitializeUnit = [[
 	end
 ]]
 
-local unitButtonTemplate = ClickCastHeader and ("ClickCastUnitTemplate,SUF_SecureUnitTemplate,PingableUnitFrameTemplate,BackdropTemplate") or ("SUF_SecureUnitTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+local backdropTpl = BackdropTemplateMixin and ",BackdropTemplate" or ""
+local unitButtonTemplate = ClickCastHeader and ("ClickCastUnitTemplate,SUF_SecureUnitTemplate" .. backdropTpl) or ("SUF_SecureUnitTemplate" .. backdropTpl)
 
 -- Header unit initialized
 local function initializeUnit(header, frameName)
@@ -973,7 +974,7 @@ function Units:LoadUnit(unit)
 		return
 	end
 
-	local frame = self:CreateUnit("Button", "SUFUnit" .. unit, petBattleFrame, "SecureUnitButtonTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+	local frame = self:CreateUnit("Button", "SUFUnit" .. unit, petBattleFrame, "SecureUnitButtonTemplate" .. backdropTpl)
 	frame:SetAttribute("unit", unit)
 	frame.hasStateWatch = unit == "pet"
 
@@ -1213,7 +1214,7 @@ function Units:LoadZoneHeader(type)
 	end
 
 	for id, unit in pairs(ShadowUF[type .. "Units"]) do
-		local frame = self:CreateUnit("Button", "SUFHeader" .. type .. "UnitButton" .. id, headerFrame, "SecureUnitButtonTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+		local frame = self:CreateUnit("Button", "SUFHeader" .. type .. "UnitButton" .. id, headerFrame, "SecureUnitButtonTemplate" .. backdropTpl)
 		frame.ignoreAnchor = true
 		frame.hasStateWatch = true
 		frame.unitUnmapped = type .. id
@@ -1329,7 +1330,7 @@ function Units:LoadChildUnit(parent, type, id)
 	end
 
 	-- Now we can create the actual frame
-	local frame = self:CreateUnit("Button", "SUFChild" .. type .. string.match(parent:GetName(), "(%d+)"), parent, "SecureUnitButtonTemplate,PingableUnitFrameTemplate,BackdropTemplate")
+	local frame = self:CreateUnit("Button", "SUFChild" .. type .. string.match(parent:GetName(), "(%d+)"), parent, "SecureUnitButtonTemplate" .. backdropTpl)
 	frame.unitType = type
 	frame.parent = parent
 	frame.isChildUnit = true

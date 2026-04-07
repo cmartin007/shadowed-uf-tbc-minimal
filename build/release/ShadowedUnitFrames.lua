@@ -736,7 +736,11 @@ end
 local active_hiddens = {}
 function ShadowUF:HideBlizzardFrames()
 	if( self.db.profile.hidden.cast and not active_hiddens.cast ) then
-		hideBlizzardFrames(true, _G.PlayerCastingBarFrame, _G.PetCastingBarFrame)
+		-- Classic/TBC: CastingBarFrame; retail: PlayerCastingBarFrame
+		local castBar = _G.PlayerCastingBarFrame or _G.CastingBarFrame
+		local petCastBar = _G.PetCastingBarFrame
+		hideBlizzardFrames(true, castBar, petCastBar)
+		active_hiddens.cast = true
 	end
 
 	if( self.db.profile.hidden.party and not active_hiddens.party ) then
